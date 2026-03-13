@@ -711,6 +711,7 @@
   const OUTER_PADDING_DESKTOP = 24;
   const OUTER_PADDING_TABLET = 16;
   const OUTER_PADDING_MOBILE = 12;
+  const STEP_INTERVAL = 2800;
 
   const STEPS = [
     {
@@ -790,7 +791,6 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
         padding: 0;
         width: 100%;
         min-height: 100%;
-        overflow: hidden !important;
         background: #f8f8f8;
         font-family: Inter, Arial, Helvetica, sans-serif;
       }
@@ -802,7 +802,6 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
 
       #root {
         width: 100%;
-        overflow: hidden !important;
       }
 
       .ito-stage-shell {
@@ -1063,13 +1062,19 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
         animation: ito-spin 0.9s linear infinite;
       }
 
-      .ito-timeline {
+      .ito-timeline-viewport {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .ito-timeline-track {
         display: flex;
         flex-direction: column;
         gap: 14px;
-        overflow: hidden;
-        height: 100%;
-        padding-right: 0;
+        transform: translateY(0);
+        transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
       }
 
       .ito-step {
@@ -1515,15 +1520,13 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
   function getShotsHtml(shots, isDone, isFail) {
     return `
       <div class="ito-shot-row">
-        ${shots
-          .map(function (shot) {
-            const errorLabel =
-              shot === "error" && isFail
-                ? `<span class="ito-shot-error-label">ERR</span>`
-                : "";
-            return `<span class="ito-shot ${shot} ${isDone ? "is-done" : ""}">${errorLabel}</span>`;
-          })
-          .join("")}
+        ${shots.map(function (shot) {
+          const errorLabel =
+            shot === "error" && isFail
+              ? `<span class="ito-shot-error-label">ERR</span>`
+              : "";
+          return `<span class="ito-shot ${shot} ${isDone ? "is-done" : ""}">${errorLabel}</span>`;
+        }).join("")}
       </div>
     `;
   }
@@ -1563,21 +1566,18 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
         isRunning ? "is-active" : "",
         isFuture ? "is-dim" : "",
         isDone && step.status === "fail" ? "is-fail" : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
+      ].filter(Boolean).join(" ");
 
       const wrapperClass = [
         "ito-step",
         isDone ? "is-complete" : "",
         isRunning ? "is-active" : "",
         isFuture ? "is-future" : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
+      ].filter(Boolean).join(" ");
 
       const showExpanded = isDone || isRunning;
       const showStatus = isDone;
+
       const rightStatus = isRunning
         ? `<span>running…</span>`
         : showStatus
@@ -1606,11 +1606,11 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
             ${
               showExpanded
                 ? `
-              <div class="ito-step-expand">
-                ${getShotsHtml(step.shots, isDone, step.status === "fail")}
-                <pre class="ito-code"><code>${escapeHtml(step.codeSnippet)}</code></pre>
-              </div>
-            `
+                  <div class="ito-step-expand">
+                    ${getShotsHtml(step.shots, isDone, step.status === "fail")}
+                    <pre class="ito-code"><code>${escapeHtml(step.codeSnippet)}</code></pre>
+                  </div>
+                `
                 : ""
             }
           </div>
@@ -1629,9 +1629,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
         "ito-report-row",
         isRunning ? "is-current" : "",
         isFuture ? "is-muted" : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
+      ].filter(Boolean).join(" ");
 
       const leftIcon = isRunning
         ? `<span class="ito-mini active"></span>`
@@ -1664,10 +1662,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
 
   function renderHero(stepIndex) {
     const safeIndex = Math.max(0, Math.min(stepIndex, STEPS.length));
-    const progress = Math.max(
-      0,
-      Math.min(Math.round((safeIndex / STEPS.length) * 100), 100)
-    );
+    const progress = Math.max(0, Math.min(Math.round((safeIndex / STEPS.length) * 100), 100));
 
     const runningLabel =
       safeIndex === 0
@@ -1695,7 +1690,6 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
 
                   <div class="ito-pr-list">
                     ${renderPullRequests()}
-
                     <article class="ito-pr-skeleton">
                       <div class="ito-pr-skeleton-dot"></div>
                       <div class="ito-pr-skeleton-lines">
@@ -1722,8 +1716,10 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
                     </div>
                   </div>
 
-                  <div class="ito-timeline">
-                    ${renderTimeline(safeIndex)}
+                  <div class="ito-timeline-viewport" data-timeline-viewport>
+                    <div class="ito-timeline-track" data-timeline-track>
+                      ${renderTimeline(safeIndex)}
+                    </div>
                   </div>
 
                   <div class="ito-statusbar">
@@ -1816,6 +1812,53 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
     wrap.style.height = scaledHeight + "px";
   }
 
+  function updateTimelineTransform(root, activeIndex) {
+    const viewport = root.querySelector("[data-timeline-viewport]");
+    const track = root.querySelector("[data-timeline-track]");
+    const active = root.querySelector('.ito-step.is-active');
+
+    if (!viewport || !track || !active) {
+      if (track) track.style.transform = "translateY(0px)";
+      return;
+    }
+
+    const viewportHeight = viewport.clientHeight;
+    const activeTop = active.offsetTop;
+    const activeHeight = active.offsetHeight;
+    const activeCenter = activeTop + activeHeight / 2;
+    const targetY = Math.max(0, activeCenter - viewportHeight / 2);
+    const maxY = Math.max(0, track.scrollHeight - viewportHeight);
+    const clampedY = Math.min(targetY, maxY);
+
+    track.style.transform = "translateY(-" + clampedY + "px)";
+  }
+
+  function lockWheelAndTouch(root) {
+    const stop = function (e) {
+      const inside = e.target && root.contains(e.target);
+      if (!inside) return;
+
+      if (e.type === "wheel") {
+        e.preventDefault();
+      }
+
+      if (e.type === "touchmove") {
+        e.preventDefault();
+      }
+    };
+
+    root.__itoInputLockHandler = stop;
+    root.addEventListener("wheel", stop, { passive: false });
+    root.addEventListener("touchmove", stop, { passive: false });
+  }
+
+  function unlockWheelAndTouch(root) {
+    if (!root.__itoInputLockHandler) return;
+    root.removeEventListener("wheel", root.__itoInputLockHandler);
+    root.removeEventListener("touchmove", root.__itoInputLockHandler);
+    root.__itoInputLockHandler = null;
+  }
+
   function startHeroAnimation(root) {
     let stepIndex = 0;
     let intervalId = null;
@@ -1823,6 +1866,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
     function render() {
       root.innerHTML = renderHero(stepIndex);
       updateScale(root);
+      updateTimelineTransform(root, stepIndex);
 
       const button = root.querySelector(".ito-rerun-btn");
       if (button) {
@@ -1837,7 +1881,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
           intervalId = setInterval(function () {
             stepIndex = (stepIndex + 1) % (STEPS.length + 2);
             render();
-          }, 2800);
+          }, STEP_INTERVAL);
         });
       }
     }
@@ -1847,7 +1891,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
     intervalId = setInterval(function () {
       stepIndex = (stepIndex + 1) % (STEPS.length + 2);
       render();
-    }, 2800);
+    }, STEP_INTERVAL);
 
     root.__itoCleanup = function () {
       if (intervalId) clearInterval(intervalId);
@@ -1864,6 +1908,9 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
       root.__itoCleanup();
     }
 
+    unlockWheelAndTouch(root);
+    lockWheelAndTouch(root);
+
     startHeroAnimation(root);
 
     if (root.__itoResizeHandler) {
@@ -1872,6 +1919,7 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
 
     root.__itoResizeHandler = function () {
       updateScale(root);
+      updateTimelineTransform(root);
     };
 
     window.addEventListener("resize", root.__itoResizeHandler, { passive: true });
@@ -1883,12 +1931,14 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
 
       root.__itoResizeObserver = new ResizeObserver(function () {
         updateScale(root);
+        updateTimelineTransform(root);
       });
 
       root.__itoResizeObserver.observe(root);
     }
 
     updateScale(root);
+    updateTimelineTransform(root);
   }
 
   if (document.readyState === "loading") {
