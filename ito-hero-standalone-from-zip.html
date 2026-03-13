@@ -12,24 +12,42 @@
      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --bg: #f8f8f8;
+  --background: #f8f8f8;
+  --foreground: #141414;
+
   --surface: #ffffff;
   --surface-alt: #fcfcfc;
-  --text: #141414;
-  --text-soft: #666666;
-  --text-muted: #888888;
+  --surface-soft: #fafafa;
+
   --border: #e7e7e7;
   --border-soft: #efefef;
-  --border-softer: #f1f1f1;
-  --green: #16a34a;
-  --green-bg: #f0fdf4;
-  --red: #dc2626;
-  --red-bg: #fef2f2;
-  --radius-xl: 20px;
+  --border-strong: #d9d9d9;
+  --border-active: #3a3a3a;
+
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --text-muted: #888888;
+
+  --success: #16a34a;
+  --success-soft: #f0fdf4;
+
+  --danger: #dc2626;
+  --danger-soft: #fffafa;
+  --danger-border: #f1caca;
+
+  --radius-frame: 20px;
   --radius-lg: 16px;
   --radius-md: 14px;
   --radius-sm: 12px;
-  --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-xs: 10px;
+
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-fast: 0.35s;
+  --duration-base: 0.55s;
+  --duration-slow: 0.75s;
+
   --font-body: "Inter", Arial, Helvetica, sans-serif;
 }
 
@@ -40,16 +58,18 @@
 }
 
 html,
-body {
+body,
+#root {
   width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 0;
-  background: var(--bg);
 }
 
 body {
-  color: var(--text);
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-body);
   line-height: 1.5;
   overflow-x: hidden;
@@ -57,20 +77,19 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-button {
+button,
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
 
-#root {
-  width: 100%;
-}
-
 .ito-stage-shell {
   width: 100%;
-  padding: 24px;
-  background: var(--bg);
   overflow: hidden;
+  background: var(--background);
+  padding: 24px;
 }
 
 .ito-scale-wrap {
@@ -93,24 +112,24 @@ button {
   height: 760px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-frame);
   overflow: hidden;
 }
 
 .ito-hero-topbar,
 .ito-hero-bottombar {
-  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 18px;
+  height: 52px;
+  padding: 0 18px;
   background: var(--surface-alt);
   font-size: 11px;
   line-height: 1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-soft);
+  color: var(--text-secondary);
 }
 
 .ito-hero-topbar {
@@ -123,30 +142,7 @@ button {
 
 .ito-kicker {
   font-weight: 600;
-  color: #111;
-}
-
-.ito-live,
-.ito-connected,
-.ito-status-left,
-.ito-run-meta,
-.ito-bottom-right,
-.ito-col-head,
-.ito-col-head-split,
-.ito-head-progress,
-.ito-pr-meta,
-.ito-pr-footer,
-.ito-step-top,
-.ito-step-title-wrap,
-.ito-step-status,
-.ito-report-row,
-.ito-report-left,
-.ito-report-right,
-.ito-report-summary-top,
-.ito-report-summary-bottom,
-.ito-metrics {
-  display: flex;
-  align-items: center;
+  color: var(--text-primary);
 }
 
 .ito-live,
@@ -154,17 +150,26 @@ button {
 .ito-status-left,
 .ito-run-meta,
 .ito-bottom-right {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+}
+
+.ito-live-dot,
+.ito-connected i,
+.ito-run-spinner,
+.ito-mini.active,
+.ito-spinner-ring {
+  display: inline-block;
+  border-radius: 999px;
 }
 
 .ito-live-dot,
 .ito-connected i {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
-  background: var(--green);
+  background: var(--success);
   box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
-  flex: 0 0 auto;
 }
 
 .ito-hero-grid {
@@ -188,17 +193,21 @@ button {
 
 .ito-col-head,
 .ito-col-head-split {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 0 16px;
+  margin-bottom: 16px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-soft);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .ito-head-progress {
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
   font-size: 10px;
   color: var(--text-muted);
@@ -211,23 +220,41 @@ button {
 }
 
 .ito-pr-card,
+.ito-pr-skeleton,
+.ito-step-card,
+.ito-statusbar,
+.ito-report-summary,
+.ito-report-list,
+.ito-metrics,
+.ito-rerun-btn {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.ito-pr-card,
 .ito-pr-skeleton {
   display: flex;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #ececec;
   border-radius: var(--radius-md);
   background: var(--surface);
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    opacity var(--duration-base) var(--ease-smooth),
+    border-color var(--duration-base) var(--ease-smooth),
+    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-pr-icon {
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
   display: grid;
   place-items: center;
   background: #f3f3f3;
-  color: #111;
+  border: 1px solid var(--border-soft);
+  color: var(--text-primary);
   font-size: 15px;
   flex: 0 0 auto;
 }
@@ -241,14 +268,14 @@ button {
   font-size: 13px;
   line-height: 1.35;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .ito-pr-branch,
 .ito-pr-meta,
 .ito-pr-footer {
   font-size: 11px;
-  color: #777;
+  color: #777777;
 }
 
 .ito-pr-branch {
@@ -257,6 +284,8 @@ button {
 
 .ito-pr-meta,
 .ito-pr-footer {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-top: 8px;
@@ -266,10 +295,10 @@ button {
   position: relative;
   width: 100%;
   height: 6px;
-  margin-top: 10px;
+  background: #f1f1f1;
   border-radius: 999px;
   overflow: hidden;
-  background: #f1f1f1;
+  margin-top: 10px;
 }
 
 .ito-progress > span {
@@ -277,8 +306,8 @@ button {
   inset: 0 auto 0 0;
   width: 58%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #111 0%, #666 100%);
-  transition: width 900ms var(--ease-apple);
+  background: linear-gradient(90deg, #111111 0%, #666666 100%);
+  transition: width 0.9s var(--ease-smooth);
 }
 
 .ito-progress-short {
@@ -289,7 +318,7 @@ button {
 .ito-pr-skeleton-dot {
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
   background: linear-gradient(90deg, #f1f1f1 25%, #fafafa 50%, #f1f1f1 75%);
   background-size: 200% 100%;
   animation: ito-shimmer 1.5s linear infinite;
@@ -324,38 +353,21 @@ button {
 .ito-run-meta {
   margin-top: 14px;
   font-size: 11px;
-  color: #777;
-}
-
-.ito-run-spinner,
-.ito-spinner-ring,
-.ito-step-icon-running::after {
-  border-radius: 999px;
+  color: #777777;
 }
 
 .ito-run-spinner {
   width: 10px;
   height: 10px;
   border: 2px solid #d8d8d8;
-  border-top-color: #111;
+  border-top-color: #111111;
   animation: ito-spin 1.1s linear infinite;
-  flex: 0 0 auto;
-}
-
-.ito-center-main {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  gap: 16px;
 }
 
 .ito-timeline-viewport {
   position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
+  height: 100%;
   overflow: hidden;
-  overscroll-behavior: contain;
-  padding-right: 2px;
 }
 
 .ito-timeline-track {
@@ -363,14 +375,14 @@ button {
   flex-direction: column;
   gap: 14px;
   transform: translateY(0);
-  transition: transform 950ms var(--ease-apple);
+  transition: transform 800ms var(--ease-smooth);
   will-change: transform;
 }
 
 .ito-step {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: start;
 }
 
@@ -379,14 +391,15 @@ button {
   flex-direction: column;
   align-items: center;
   min-height: 100%;
+  padding-top: 10px;
 }
 
 .ito-step-dot {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: #e7e7e7;
-  border: 1px solid #d8d8d8;
+  background: #f1f1f1;
+  border: 1px solid var(--border-strong);
   flex: 0 0 auto;
 }
 
@@ -395,22 +408,22 @@ button {
 .ito-step-dot.is-active {
   display: grid;
   place-items: center;
-  color: #fff;
+  color: #ffffff;
   font-size: 9px;
   font-weight: 700;
-  border: 0;
+  border: 1px solid transparent;
 }
 
 .ito-step-dot.is-pass {
-  background: var(--green);
+  background: var(--success);
 }
 
 .ito-step-dot.is-fail {
-  background: var(--red);
+  background: var(--danger);
 }
 
 .ito-step-dot.is-active {
-  background: #111;
+  background: #111111;
   position: relative;
 }
 
@@ -418,7 +431,7 @@ button {
   width: 14px;
   height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #fff;
+  border-top-color: #ffffff;
   animation: ito-spin 1.1s linear infinite;
 }
 
@@ -427,50 +440,54 @@ button {
   flex: 1 1 auto;
   min-height: 42px;
   margin-top: 6px;
-  background: #ececec;
-  transition: background-color 600ms var(--ease-apple);
+  background: var(--border-soft);
+  transition: background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-step-line.is-done {
-  background: #cfcfcf;
+  background: var(--border-strong);
 }
 
 .ito-step-card {
-  border: 1px solid #ececec;
   border-radius: var(--radius-lg);
   padding: 14px;
   background: var(--surface);
-  transform: translateY(0) scale(1);
-  opacity: 1;
   transition:
-    transform 700ms var(--ease-apple),
-    opacity 700ms var(--ease-apple),
-    border-color 700ms var(--ease-apple),
-    background-color 700ms var(--ease-apple);
+    opacity var(--duration-base) var(--ease-smooth),
+    transform var(--duration-base) var(--ease-smooth),
+    border-color var(--duration-base) var(--ease-smooth),
+    background-color var(--duration-base) var(--ease-smooth);
   will-change: transform, opacity;
+  transform: translateY(0) scale(1);
 }
 
 .ito-step-card.is-active {
-  border-color: #111;
-  transform: translateY(-2px) scale(1.008);
+  border-color: var(--border-active);
+  transform: translateY(-1px) scale(1.003);
 }
 
 .ito-step-card.is-dim {
   opacity: 0.42;
-  transform: translateY(6px) scale(0.988);
+  border-color: var(--border-soft);
+  transform: translateY(6px) scale(0.985);
 }
 
 .ito-step-card.is-fail {
-  border-color: #fecaca;
-  background: #fffafa;
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
 }
 
 .ito-step-top,
+.ito-step-title-wrap,
 .ito-step-status,
 .ito-report-row,
+.ito-report-left,
+.ito-report-right,
 .ito-report-summary-top,
 .ito-report-summary-bottom,
 .ito-metrics {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -478,7 +495,6 @@ button {
 .ito-step-title-wrap,
 .ito-report-left {
   justify-content: flex-start;
-  gap: 10px;
   min-width: 0;
 }
 
@@ -490,25 +506,25 @@ button {
   display: grid;
   place-items: center;
   background: #f1f1f1;
-  color: #666;
+  color: #666666;
   font-size: 11px;
   flex: 0 0 auto;
 }
 
 .ito-step-icon.is-pass,
 .ito-mini.pass {
-  background: var(--green-bg);
-  color: var(--green);
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .ito-step-icon.is-fail,
 .ito-mini.fail {
-  background: var(--red-bg);
-  color: var(--red);
+  background: #fef2f2;
+  color: var(--danger);
 }
 
 .ito-step-icon-running {
-  background: #111;
+  background: #111111;
   position: relative;
 }
 
@@ -516,42 +532,43 @@ button {
   content: "";
   width: 8px;
   height: 8px;
+  border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.25);
-  border-top-color: #fff;
+  border-top-color: #ffffff;
   animation: ito-spin 1s linear infinite;
 }
 
 .ito-step-title {
   min-width: 0;
   font-size: 13px;
-  line-height: 1.35;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
+  line-height: 1.35;
 }
 
 .ito-step-status {
   font-size: 11px;
-  color: #777;
+  color: #777777;
   flex: 0 0 auto;
 }
 
 .ito-step-status .is-pass,
 .ito-report-right .is-pass,
 .ito-metrics .is-pass {
-  color: var(--green);
+  color: var(--success);
 }
 
 .ito-step-status .is-fail,
 .ito-report-right .is-fail,
 .ito-metrics .is-fail {
-  color: var(--red);
+  color: var(--danger);
 }
 
 .ito-step-sub {
   margin-top: 7px;
   font-size: 12px;
   line-height: 1.5;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .ito-step-sub.is-error {
@@ -561,9 +578,8 @@ button {
 .ito-step-expand {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--border-softer);
-  animation: ito-fade-up 700ms var(--ease-apple);
-  transform-origin: top center;
+  border-top: 1px solid var(--border-soft);
+  animation: ito-fade-up 0.7s var(--ease-smooth);
 }
 
 .ito-shot-row {
@@ -581,8 +597,8 @@ button {
   place-items: center;
   position: relative;
   transition:
-    transform 650ms var(--ease-apple),
-    opacity 650ms var(--ease-apple);
+    transform var(--duration-base) var(--ease-smooth),
+    opacity var(--duration-base) var(--ease-smooth);
 }
 
 .ito-step.is-active .ito-shot {
@@ -614,28 +630,27 @@ button {
   line-height: 1;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #fff;
+  color: #ffffff;
 }
 
 .ito-code {
   margin: 0;
   padding: 12px;
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
-  border: 1px solid #f0f0f0;
-  background: #fafafa;
+  background: var(--surface-soft);
   overflow: hidden;
-  white-space: pre-wrap;
-  word-break: break-word;
   font-size: 11px;
   line-height: 1.5;
-  color: #333;
+  color: #333333;
+  white-space: pre-wrap;
+  word-break: break-word;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 .ito-statusbar {
-  margin-top: 0;
+  margin-top: 16px;
   padding: 12px 14px;
-  border: 1px solid #ececec;
   border-radius: var(--radius-md);
   background: var(--surface-alt);
   display: flex;
@@ -643,27 +658,35 @@ button {
   justify-content: space-between;
   gap: 12px;
   font-size: 11px;
-  color: #666;
-  flex: 0 0 auto;
+  color: var(--text-secondary);
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    opacity var(--duration-base) var(--ease-smooth),
+    border-color var(--duration-base) var(--ease-smooth),
+    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-report-summary {
   padding: 14px;
-  border: 1px solid #ececec;
   border-radius: var(--radius-lg);
   background: var(--surface-alt);
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    opacity var(--duration-base) var(--ease-smooth),
+    border-color var(--duration-base) var(--ease-smooth),
+    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-report-summary-top strong {
   font-size: 22px;
   line-height: 1;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .ito-report-summary-top,
 .ito-report-summary-bottom {
   font-size: 11px;
-  color: #777;
+  color: #777777;
 }
 
 .ito-report-summary-bottom {
@@ -672,21 +695,18 @@ button {
 
 .ito-report-list {
   margin-top: 14px;
-  border: 1px solid #ececec;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--surface);
 }
 
 .ito-report-row {
-  justify-content: space-between;
-  gap: 10px;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border-softer);
+  border-bottom: 1px solid var(--border-soft);
   transition:
-    opacity 500ms var(--ease-apple),
-    background-color 500ms var(--ease-apple),
-    transform 500ms var(--ease-apple);
+    opacity 0.45s var(--ease-smooth),
+    background-color 0.45s var(--ease-smooth),
+    transform 0.45s var(--ease-smooth);
 }
 
 .ito-report-row:last-child {
@@ -705,21 +725,23 @@ button {
 
 .ito-report-left,
 .ito-report-right {
-  gap: 10px;
   font-size: 12px;
-  color: #555;
+  color: #555555;
 }
 
 .ito-report-footer {
   margin-top: 14px;
-  padding-top: 2px;
 }
 
 .ito-metrics {
-  border: 1px solid #ececec;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--surface);
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    opacity var(--duration-base) var(--ease-smooth),
+    border-color var(--duration-base) var(--ease-smooth),
+    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-metrics > div {
@@ -736,29 +758,30 @@ button {
 .ito-metrics p {
   margin: 0 0 4px;
   font-size: 11px;
-  color: #777;
+  color: #777777;
 }
 
 .ito-metrics strong {
   font-size: 18px;
   line-height: 1;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .ito-rerun-btn {
   width: 100%;
   margin-top: 14px;
-  border: 0;
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  background: #111;
-  color: #fff;
+  background: #111111;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    transform 500ms var(--ease-apple),
-    opacity 500ms var(--ease-apple);
+    transform var(--duration-fast) var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth),
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth);
 }
 
 .ito-rerun-btn:hover {
@@ -768,6 +791,17 @@ button {
 
 .ito-rerun-btn:active {
   transform: translateY(0);
+}
+
+@keyframes ito-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes ito-spin {
@@ -785,17 +819,6 @@ button {
   }
 }
 
-@keyframes ito-fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.985);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @media (max-width: 991px) {
   .ito-stage-shell {
     padding: 16px;
@@ -805,41 +828,6 @@ button {
 @media (max-width: 767px) {
   .ito-stage-shell {
     padding: 12px;
-  }
-}
-
-@media (max-width: 479px) {
-  .ito-hero-topbar,
-  .ito-hero-bottombar {
-    padding: 12px 16px;
-  }
-
-  .ito-col {
-    padding: 16px;
-  }
-
-  .ito-center-main {
-    gap: 14px;
-  }
-
-  .ito-report-footer {
-    margin-top: 12px;
-  }
-
-  .ito-metrics > div {
-    padding: 12px 10px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ito-progress > span,
-  .ito-timeline-track,
-  .ito-step-card,
-  .ito-shot,
-  .ito-report-row,
-  .ito-rerun-btn {
-    transition-duration: 0ms !important;
-    animation-duration: 0ms !important;
   }
 }
     </style>
