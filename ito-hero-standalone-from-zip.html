@@ -41,12 +41,14 @@
   --radius-sm: 12px;
   --radius-xs: 10px;
 
-  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-morph: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.33, 1, 0.68, 1);
 
-  --duration-fast: 0.35s;
-  --duration-base: 0.55s;
-  --duration-slow: 0.75s;
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 500ms;
+  --duration-scroll: 600ms;
 
   --font-body: "Inter", Arial, Helvetica, sans-serif;
 }
@@ -85,6 +87,8 @@ textarea {
   color: inherit;
 }
 
+/* ━━━━━ LAYOUT SHELL ━━━━━ */
+
 .ito-stage-shell {
   width: 100%;
   overflow: hidden;
@@ -116,6 +120,8 @@ textarea {
   overflow: hidden;
 }
 
+/* ━━━━━ TOP / BOTTOM BARS ━━━━━ */
+
 .ito-hero-topbar,
 .ito-hero-bottombar {
   display: flex;
@@ -132,13 +138,8 @@ textarea {
   color: var(--text-secondary);
 }
 
-.ito-hero-topbar {
-  border-bottom: 1px solid var(--border-soft);
-}
-
-.ito-hero-bottombar {
-  border-top: 1px solid var(--border-soft);
-}
+.ito-hero-topbar { border-bottom: 1px solid var(--border-soft); }
+.ito-hero-bottombar { border-top: 1px solid var(--border-soft); }
 
 .ito-kicker {
   font-weight: 600;
@@ -172,6 +173,8 @@ textarea {
   box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
 }
 
+/* ━━━━━ GRID ━━━━━ */
+
 .ito-hero-grid {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 280px;
@@ -184,6 +187,18 @@ textarea {
   min-height: 0;
   padding: 18px;
   overflow: hidden;
+}
+
+.ito-col-center {
+  display: flex;
+  flex-direction: column;
+}
+
+.ito-center-main {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .ito-col-left,
@@ -203,6 +218,7 @@ textarea {
   letter-spacing: 0.08em;
   color: var(--text-secondary);
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .ito-head-progress {
@@ -212,6 +228,8 @@ textarea {
   font-size: 10px;
   color: var(--text-muted);
 }
+
+/* ━━━━━ PR CARDS ━━━━━ */
 
 .ito-pr-list {
   display: flex;
@@ -239,11 +257,6 @@ textarea {
   padding: 12px;
   border-radius: var(--radius-md);
   background: var(--surface);
-  transition:
-    transform var(--duration-base) var(--ease-smooth),
-    opacity var(--duration-base) var(--ease-smooth),
-    border-color var(--duration-base) var(--ease-smooth),
-    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-pr-icon {
@@ -259,10 +272,7 @@ textarea {
   flex: 0 0 auto;
 }
 
-.ito-pr-body {
-  min-width: 0;
-  flex: 1;
-}
+.ito-pr-body { min-width: 0; flex: 1; }
 
 .ito-pr-title {
   font-size: 13px;
@@ -271,19 +281,14 @@ textarea {
   color: var(--text-primary);
 }
 
-.ito-pr-branch,
-.ito-pr-meta,
-.ito-pr-footer {
+.ito-pr-branch, .ito-pr-meta, .ito-pr-footer {
   font-size: 11px;
   color: #777777;
 }
 
-.ito-pr-branch {
-  margin-top: 2px;
-}
+.ito-pr-branch { margin-top: 2px; }
 
-.ito-pr-meta,
-.ito-pr-footer {
+.ito-pr-meta, .ito-pr-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -307,13 +312,10 @@ textarea {
   width: 58%;
   border-radius: inherit;
   background: linear-gradient(90deg, #111111 0%, #666666 100%);
-  transition: width 0.9s var(--ease-smooth);
+  transition: width 0.7s var(--ease-settle);
 }
 
-.ito-progress-short {
-  width: 84px;
-  margin-top: 0;
-}
+.ito-progress-short { width: 84px; margin-top: 0; }
 
 .ito-pr-skeleton-dot {
   width: 32px;
@@ -342,13 +344,8 @@ textarea {
   animation: ito-shimmer 1.5s linear infinite;
 }
 
-.ito-pr-skeleton-lines span:first-child {
-  width: 65%;
-}
-
-.ito-pr-skeleton-lines span:last-child {
-  width: 40%;
-}
+.ito-pr-skeleton-lines span:first-child { width: 65%; }
+.ito-pr-skeleton-lines span:last-child { width: 40%; }
 
 .ito-run-meta {
   margin-top: 14px;
@@ -359,14 +356,17 @@ textarea {
 .ito-run-spinner {
   width: 10px;
   height: 10px;
-  border: 2px solid #d8d8d8;
+  border: 1.5px solid #d8d8d8;
   border-top-color: #111111;
-  animation: ito-spin 1.1s linear infinite;
+  animation: ito-spin 0.9s linear infinite;
 }
+
+/* ━━━━━ TIMELINE ━━━━━ */
 
 .ito-timeline-viewport {
   position: relative;
-  height: 100%;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -374,8 +374,10 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* pad top so first card border isn't clipped by overflow:hidden when translateY(-1px) */
+  padding-top: 2px;
   transform: translateY(0);
-  transition: transform 800ms var(--ease-smooth);
+  transition: transform var(--duration-scroll) var(--ease-settle);
   will-change: transform;
 }
 
@@ -394,6 +396,8 @@ textarea {
   padding-top: 10px;
 }
 
+/* ── RAIL DOT ── */
+
 .ito-step-dot {
   width: 14px;
   height: 14px;
@@ -401,6 +405,10 @@ textarea {
   background: #f1f1f1;
   border: 1px solid var(--border-strong);
   flex: 0 0 auto;
+  transition:
+    background-color var(--duration-base) var(--ease-morph),
+    border-color var(--duration-base) var(--ease-morph),
+    box-shadow var(--duration-base) var(--ease-morph);
 }
 
 .ito-step-dot.is-pass,
@@ -414,25 +422,25 @@ textarea {
   border: 1px solid transparent;
 }
 
-.ito-step-dot.is-pass {
-  background: var(--success);
-}
-
-.ito-step-dot.is-fail {
-  background: var(--danger);
-}
+.ito-step-dot.is-pass { background: var(--success); }
+.ito-step-dot.is-fail { background: var(--danger); }
 
 .ito-step-dot.is-active {
+  width: 18px;
+  height: 18px;
   background: #111111;
   position: relative;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+  animation: ito-dot-pulse 2.4s ease-in-out infinite;
 }
 
 .ito-spinner-ring {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
   border-top-color: #ffffff;
-  animation: ito-spin 1.1s linear infinite;
+  animation: ito-spin 0.85s linear infinite;
 }
 
 .ito-step-line {
@@ -441,41 +449,43 @@ textarea {
   min-height: 42px;
   margin-top: 6px;
   background: var(--border-soft);
-  transition: background-color var(--duration-base) var(--ease-smooth);
+  transition: background-color var(--duration-base) var(--ease-morph);
 }
 
-.ito-step-line.is-done {
-  background: var(--border-strong);
-}
+.ito-step-line.is-done { background: var(--border-strong); }
+
+/* ━━━━━ STEP CARD ━━━━━ */
 
 .ito-step-card {
   border-radius: var(--radius-lg);
   padding: 14px;
   background: var(--surface);
   transition:
-    opacity var(--duration-base) var(--ease-smooth),
-    transform var(--duration-base) var(--ease-smooth),
-    border-color var(--duration-base) var(--ease-smooth),
-    background-color var(--duration-base) var(--ease-smooth);
+    opacity var(--duration-base) var(--ease-morph),
+    transform var(--duration-base) var(--ease-morph),
+    border-color var(--duration-base) var(--ease-morph),
+    background-color var(--duration-base) var(--ease-morph);
   will-change: transform, opacity;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
 .ito-step-card.is-active {
   border-color: var(--border-active);
-  transform: translateY(-1px) scale(1.003);
+  transform: translateY(-1px);
 }
 
 .ito-step-card.is-dim {
   opacity: 0.42;
   border-color: var(--border-soft);
-  transform: translateY(6px) scale(0.985);
+  transform: translateY(3px);
 }
 
 .ito-step-card.is-fail {
   border-color: var(--danger-border);
   background: var(--danger-soft);
 }
+
+/* ── Step internals ── */
 
 .ito-step-top,
 .ito-step-title-wrap,
@@ -509,16 +519,17 @@ textarea {
   color: #666666;
   font-size: 11px;
   flex: 0 0 auto;
+  transition:
+    background-color var(--duration-fast) var(--ease-morph),
+    color var(--duration-fast) var(--ease-morph);
 }
 
-.ito-step-icon.is-pass,
-.ito-mini.pass {
+.ito-step-icon.is-pass, .ito-mini.pass {
   background: var(--success-soft);
   color: var(--success);
 }
 
-.ito-step-icon.is-fail,
-.ito-mini.fail {
+.ito-step-icon.is-fail, .ito-mini.fail {
   background: #fef2f2;
   color: var(--danger);
 }
@@ -530,12 +541,12 @@ textarea {
 
 .ito-step-icon-running::after {
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-top-color: #ffffff;
-  animation: ito-spin 1s linear infinite;
+  animation: ito-spin 0.85s linear infinite;
 }
 
 .ito-step-title {
@@ -552,17 +563,8 @@ textarea {
   flex: 0 0 auto;
 }
 
-.ito-step-status .is-pass,
-.ito-report-right .is-pass,
-.ito-metrics .is-pass {
-  color: var(--success);
-}
-
-.ito-step-status .is-fail,
-.ito-report-right .is-fail,
-.ito-metrics .is-fail {
-  color: var(--danger);
-}
+.ito-step-status .is-pass, .ito-report-right .is-pass, .ito-metrics .is-pass { color: var(--success); }
+.ito-step-status .is-fail, .ito-report-right .is-fail, .ito-metrics .is-fail { color: var(--danger); }
 
 .ito-step-sub {
   margin-top: 7px;
@@ -571,16 +573,25 @@ textarea {
   color: var(--text-secondary);
 }
 
-.ito-step-sub.is-error {
-  color: #b91c1c;
-}
+.ito-step-sub.is-error { color: #b91c1c; }
+
+/* ── Expand panel ── */
 
 .ito-step-expand {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border-soft);
-  animation: ito-fade-up 0.7s var(--ease-smooth);
 }
+
+.ito-step-expand .ito-shot-row {
+  animation: ito-fade-up 350ms var(--ease-out) both;
+}
+
+.ito-step-expand .ito-code {
+  animation: ito-fade-up 350ms var(--ease-out) 80ms both;
+}
+
+/* ━━━━━ MINI SCREENSHOTS ━━━━━ */
 
 .ito-shot-row {
   display: flex;
@@ -589,48 +600,44 @@ textarea {
 }
 
 .ito-shot {
-  width: 46px;
-  height: 32px;
-  border-radius: 9px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  display: grid;
-  place-items: center;
+  width: 64px;
+  height: 44px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  overflow: hidden;
   position: relative;
+  background: #ffffff;
+  flex: 0 0 auto;
   transition:
-    transform var(--duration-base) var(--ease-smooth),
-    opacity var(--duration-base) var(--ease-smooth);
+    transform var(--duration-base) var(--ease-morph),
+    opacity var(--duration-base) var(--ease-morph);
 }
 
 .ito-step.is-active .ito-shot {
   transform: translateY(-1px);
 }
 
-.ito-shot.blue {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-}
-
-.ito-shot.green {
-  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-}
-
-.ito-shot.red {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-}
-
-.ito-shot.purple {
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+.ito-shot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .ito-shot.error {
-  background: linear-gradient(135deg, #111111, #333333);
+  background: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .ito-shot-error-label {
-  font-size: 9px;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
   line-height: 1;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #ffffff;
+  color: #ef4444;
 }
 
 .ito-code {
@@ -648,6 +655,8 @@ textarea {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* ━━━━━ STATUS BAR ━━━━━ */
+
 .ito-statusbar {
   margin-top: 16px;
   padding: 12px 14px;
@@ -659,22 +668,15 @@ textarea {
   gap: 12px;
   font-size: 11px;
   color: var(--text-secondary);
-  transition:
-    transform var(--duration-base) var(--ease-smooth),
-    opacity var(--duration-base) var(--ease-smooth),
-    border-color var(--duration-base) var(--ease-smooth),
-    background-color var(--duration-base) var(--ease-smooth);
+  flex-shrink: 0;
 }
+
+/* ━━━━━ QA REPORT ━━━━━ */
 
 .ito-report-summary {
   padding: 14px;
   border-radius: var(--radius-lg);
   background: var(--surface-alt);
-  transition:
-    transform var(--duration-base) var(--ease-smooth),
-    opacity var(--duration-base) var(--ease-smooth),
-    border-color var(--duration-base) var(--ease-smooth),
-    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-report-summary-top strong {
@@ -689,9 +691,7 @@ textarea {
   color: #777777;
 }
 
-.ito-report-summary-bottom {
-  margin-top: 10px;
-}
+.ito-report-summary-bottom { margin-top: 10px; }
 
 .ito-report-list {
   margin-top: 14px;
@@ -704,14 +704,12 @@ textarea {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-soft);
   transition:
-    opacity 0.45s var(--ease-smooth),
-    background-color 0.45s var(--ease-smooth),
-    transform 0.45s var(--ease-smooth);
+    opacity var(--duration-base) var(--ease-morph),
+    background-color var(--duration-base) var(--ease-morph),
+    transform var(--duration-base) var(--ease-morph);
 }
 
-.ito-report-row:last-child {
-  border-bottom: 0;
-}
+.ito-report-row:last-child { border-bottom: 0; }
 
 .ito-report-row.is-muted {
   opacity: 0.45;
@@ -723,25 +721,17 @@ textarea {
   transform: translateY(-1px);
 }
 
-.ito-report-left,
-.ito-report-right {
+.ito-report-left, .ito-report-right {
   font-size: 12px;
   color: #555555;
 }
 
-.ito-report-footer {
-  margin-top: 14px;
-}
+.ito-report-footer { margin-top: 14px; }
 
 .ito-metrics {
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--surface);
-  transition:
-    transform var(--duration-base) var(--ease-smooth),
-    opacity var(--duration-base) var(--ease-smooth),
-    border-color var(--duration-base) var(--ease-smooth),
-    background-color var(--duration-base) var(--ease-smooth);
 }
 
 .ito-metrics > div {
@@ -767,6 +757,8 @@ textarea {
   color: var(--text-primary);
 }
 
+/* ━━━━━ RERUN BUTTON ━━━━━ */
+
 .ito-rerun-btn {
   width: 100%;
   margin-top: 14px;
@@ -778,58 +770,57 @@ textarea {
   font-weight: 600;
   cursor: pointer;
   transition:
-    transform var(--duration-fast) var(--ease-smooth),
-    opacity var(--duration-fast) var(--ease-smooth),
-    background-color var(--duration-fast) var(--ease-smooth),
-    border-color var(--duration-fast) var(--ease-smooth);
+    transform 150ms ease,
+    opacity 150ms ease,
+    background-color 150ms ease;
 }
 
 .ito-rerun-btn:hover {
-  opacity: 0.96;
+  background: #222222;
   transform: translateY(-1px);
 }
 
 .ito-rerun-btn:active {
-  transform: translateY(0);
+  transform: scale(0.97) translateY(0);
+  opacity: 0.92;
 }
 
+/* ━━━━━ KEYFRAMES ━━━━━ */
+
 @keyframes ito-fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.99);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes ito-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes ito-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-@media (max-width: 991px) {
-  .ito-stage-shell {
-    padding: 16px;
-  }
+@keyframes ito-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08); }
+  50% { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.14); }
 }
 
-@media (max-width: 767px) {
-  .ito-stage-shell {
-    padding: 12px;
+/* ━━━━━ REDUCED MOTION ━━━━━ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+  .ito-timeline-track { transition: none !important; }
+  .ito-step-card, .ito-step-card.is-active, .ito-step-card.is-dim { transform: none !important; }
+  .ito-progress > span { transition: none !important; }
 }
+
+@media (max-width: 991px) { .ito-stage-shell { padding: 16px; } }
+@media (max-width: 767px) { .ito-stage-shell { padding: 12px; } }
     </style>
   </head>
   <body>
@@ -837,27 +828,28 @@ textarea {
 
     <script>
       (function () {
+        "use strict";
         document.documentElement.classList.remove("dark");
 
-        const BASE_WIDTH = 1280;
-        const BASE_HEIGHT = 760;
-        const SHELL_PADDING_DESKTOP = 24;
-        const SHELL_PADDING_TABLET = 16;
-        const SHELL_PADDING_MOBILE = 12;
-        const STEP_INTERVAL = 3400;
-        const RESTART_DELAY = 450;
+        var BASE_WIDTH = 1280;
+        var BASE_HEIGHT = 760;
+        var SHELL_PADDING_DESKTOP = 24;
+        var SHELL_PADDING_TABLET = 16;
+        var SHELL_PADDING_MOBILE = 12;
+        var STEP_INTERVAL = 3400;
+        var COMPLETE_PAUSE = 3400;
+        var RESTART_DELAY = 450;
 
-        const STEPS = [
+        var STEPS = [
           {
             id: "s1",
             label: "Authentication flow",
             status: "pass",
             duration: "1.2s",
             actionType: "type",
-            actionDetail: 'agent.fill("#email", "user@test.com") → submit',
-            codeSnippet: `await page.fill('[data-id="email"]', 'user@test.com');
-await page.click('button[type="submit"]');`,
-            shots: ["blue", "blue", "blue"],
+            actionDetail: 'agent.fill("#email", "user@test.com") \u2192 submit',
+            codeSnippet: 'await page.fill(\'[data-id="email"]\', \'user@test.com\');\nawait page.click(\'button[type="submit"]\');',
+            shots: ["auth-1", "auth-2", "auth-3"],
           },
           {
             id: "s2",
@@ -866,22 +858,18 @@ await page.click('button[type="submit"]');`,
             duration: "0.8s",
             actionType: "assert",
             actionDetail: "expect(cart.items).toHaveLength(3)",
-            codeSnippet: `const items = await page.$$eval('.cart-item', els => els.length);
-expect(items).toBe(3);`,
-            shots: ["green", "green"],
+            codeSnippet: "const items = await page.$$eval('.cart-item', els => els.length);\nexpect(items).toBe(3);",
+            shots: ["cart-1", "cart-2"],
           },
           {
             id: "s3",
-            label: "Checkout - payment step",
+            label: "Checkout \u2013 payment step",
             status: "fail",
             duration: "3.4s",
             actionType: "error",
-            actionDetail:
-              'TimeoutError: element "#card-frame" not found after 3000ms',
-            codeSnippet: `// Error: Stripe iframe did not mount
-await page.waitForSelector('#card-frame', { timeout: 3000 });
-// → TimeoutError thrown`,
-            shots: ["red", "red", "error"],
+            actionDetail: 'TimeoutError: element "#card-frame" not found after 3000ms',
+            codeSnippet: "// Error: Stripe iframe did not mount\nawait page.waitForSelector('#card-frame', { timeout: 3000 });\n// \u2192 TimeoutError thrown",
+            shots: ["pay-1", "pay-2", "error"],
           },
           {
             id: "s4",
@@ -889,588 +877,429 @@ await page.waitForSelector('#card-frame', { timeout: 3000 });
             status: "pass",
             duration: "1.1s",
             actionType: "snapshot",
-            actionDetail: 'snapshot("confirmation") → diff 0px',
-            codeSnippet: `await expect(page).toHaveScreenshot(
-  'confirmation.png',
-  { maxDiffPixels: 0 }
-);`,
-            shots: ["purple", "purple"],
+            actionDetail: 'snapshot("confirmation") \u2192 diff 0px',
+            codeSnippet: "await expect(page).toHaveScreenshot(\n  'confirmation.png',\n  { maxDiffPixels: 0 }\n);",
+            shots: ["confirm-1", "confirm-2"],
           },
         ];
 
-        const PULL_REQUESTS = [
-          {
-            id: "pr-247",
-            branch: "feat/analytics-v2",
-            title: "Add analytics dashboard",
-            sha: "a3f8c1d",
-            filesChanged: 12,
-          },
-          {
-            id: "pr-251",
-            branch: "fix/checkout-safari",
-            title: "Fix checkout regression",
-            sha: "b9e2d4a",
-            filesChanged: 3,
-          },
+        var PULL_REQUESTS = [
+          { id: "pr-247", branch: "feat/analytics-v2", title: "Add analytics dashboard", sha: "a3f8c1d", filesChanged: 12 },
+          { id: "pr-251", branch: "fix/checkout-safari", title: "Fix checkout regression", sha: "b9e2d4a", filesChanged: 3 },
         ];
 
-        function escapeHtml(value) {
-          return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
+        /* ── MINI-SCREENSHOT SVGs ── */
+
+        var SHOT_SVGS = {
+          /* Auth flow — login form screens */
+          "auth-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8faff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="16" y="12" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="16" y="19" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="20" y="27" width="24" height="5" rx="2.5" fill="#3b82f6"/></svg>',
+          "auth-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8faff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="16" y="12" width="32" height="4" rx="2" fill="#bfdbfe"/><rect x="16" y="12" width="20" height="4" rx="2" fill="#93c5fd"/><rect x="16" y="19" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="20" y="27" width="24" height="5" rx="2.5" fill="#3b82f6"/></svg>',
+          "auth-3": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f0fdf4"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="20" r="6" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/><rect x="30" y="18" width="4" height="4" rx="0" fill="none" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.5" y1="20.5" x2="31.5" y2="21.5" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/><line x1="31.5" y1="21.5" x2="34" y2="18" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/><rect x="18" y="30" width="28" height="3" rx="1.5" fill="#bbf7d0"/></svg>',
+          /* Cart — product list screens */
+          "cart-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8fdf8"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="4" y="10" width="12" height="10" rx="2" fill="#dcfce7"/><rect x="19" y="11" width="22" height="2.5" rx="1" fill="#333"/><rect x="19" y="15.5" width="14" height="2" rx="1" fill="#aaa"/><rect x="4" y="23" width="12" height="10" rx="2" fill="#dcfce7"/><rect x="19" y="24" width="18" height="2.5" rx="1" fill="#333"/><rect x="19" y="28.5" width="10" height="2" rx="1" fill="#aaa"/><rect x="4" y="36" width="12" height="5" rx="2" fill="#dcfce7"/><rect x="19" y="37" width="20" height="2.5" rx="1" fill="#333"/></svg>',
+          "cart-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8fdf8"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="4" y="10" width="56" height="1" fill="#e5e7eb"/><rect x="4" y="14" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="14" width="16" height="2" rx="1" fill="#888"/><rect x="4" y="20" width="56" height="1" fill="#f0f0f0"/><rect x="4" y="24" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="24" width="16" height="2" rx="1" fill="#888"/><rect x="4" y="30" width="56" height="1" fill="#f0f0f0"/><rect x="4" y="34" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="34" width="16" height="2" rx="1" fill="#16a34a"/></svg>',
+          /* Payment — checkout form screens */
+          "pay-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#fffafa"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="8" y="11" width="48" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="11" y="13.5" width="30" height="2.5" rx="1" fill="#fca5a5"/><rect x="8" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="33" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="16" y="35" width="32" height="5" rx="2.5" fill="#111"/></svg>',
+          "pay-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#fffafa"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="8" y="11" width="48" height="8" rx="3" fill="#fff" stroke="#fca5a5" stroke-width="1"/><rect x="8" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="33" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="8" y="33" width="48" height="2" rx="1" fill="#fecaca"/></svg>',
+          /* Confirmation — email screens */
+          "confirm-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#faf8ff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="16" r="5" fill="#f3e8ff" stroke="#a855f7" stroke-width="0.8"/><rect x="30" y="14.5" width="4" height="3" rx="0" fill="none" stroke="#a855f7" stroke-width="0.8"/><rect x="14" y="25" width="36" height="2.5" rx="1" fill="#333"/><rect x="18" y="30" width="28" height="2" rx="1" fill="#aaa"/><rect x="20" y="35" width="24" height="2" rx="1" fill="#aaa"/></svg>',
+          "confirm-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f0fdf4"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="18" r="7" fill="#dcfce7" stroke="#16a34a" stroke-width="0.8"/><line x1="29" y1="18" x2="31" y2="20.5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><line x1="31" y1="20.5" x2="35.5" y2="15" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><rect x="16" y="29" width="32" height="2.5" rx="1" fill="#333"/><rect x="20" y="34" width="24" height="2" rx="1" fill="#aaa"/></svg>',
+        };
+
+        /* ── UTILITIES ── */
+
+        function esc(v) {
+          return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
         }
 
         function getShellPadding() {
-          const width =
-            window.innerWidth || document.documentElement.clientWidth || 0;
-          if (width <= 767) return SHELL_PADDING_MOBILE;
-          if (width <= 991) return SHELL_PADDING_TABLET;
+          var w = window.innerWidth || document.documentElement.clientWidth || 0;
+          if (w <= 767) return SHELL_PADDING_MOBILE;
+          if (w <= 991) return SHELL_PADDING_TABLET;
           return SHELL_PADDING_DESKTOP;
         }
 
-        function getStepIcon(type, state) {
-          if (state === "running") {
-            return `<span class="ito-step-icon ito-step-icon-running"></span>`;
-          }
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
 
-          if (state === "done" && type === "error") {
-            return `<span class="ito-step-icon is-fail">⚠</span>`;
-          }
+        /* ── ICON / RAIL ── */
 
-          if (state === "done") {
-            return `<span class="ito-step-icon is-pass">✓</span>`;
-          }
-
-          switch (type) {
-            case "type":
-              return `<span class="ito-step-icon">⌨</span>`;
-            case "assert":
-              return `<span class="ito-step-icon">✓</span>`;
-            case "error":
-              return `<span class="ito-step-icon">⚠</span>`;
-            case "snapshot":
-              return `<span class="ito-step-icon">▣</span>`;
-            default:
-              return `<span class="ito-step-icon">•</span>`;
-          }
+        function stepIconHtml(type, state) {
+          if (state === "running") return '<span class="ito-step-icon ito-step-icon-running"></span>';
+          if (state === "done" && type === "error") return '<span class="ito-step-icon is-fail">\u26A0</span>';
+          if (state === "done") return '<span class="ito-step-icon is-pass">\u2713</span>';
+          var m = { type: "\u2328", assert: "\u2713", error: "\u26A0", snapshot: "\u25A3" };
+          return '<span class="ito-step-icon">' + (m[type] || "\u2022") + "</span>";
         }
 
-        function getStepRail(state, status, isLast) {
-          let dot = `<div class="ito-step-dot"></div>`;
+        function stepRailHtml(state, status, isLast) {
+          var dot;
+          if (state === "running") dot = '<div class="ito-step-dot is-active"><span class="ito-spinner-ring"></span></div>';
+          else if (state === "done" && status === "pass") dot = '<div class="ito-step-dot is-pass">\u2713</div>';
+          else if (state === "done" && status === "fail") dot = '<div class="ito-step-dot is-fail">\u2715</div>';
+          else dot = '<div class="ito-step-dot"></div>';
+          var line = isLast ? "" : '<div class="ito-step-line' + (state === "done" ? " is-done" : "") + '"></div>';
+          return '<div class="ito-step-rail">' + dot + line + "</div>";
+        }
 
-          if (state === "running") {
-            dot = `
-              <div class="ito-step-dot is-active">
-                <span class="ito-spinner-ring"></span>
-              </div>
-            `;
-          } else if (state === "done" && status === "pass") {
-            dot = `<div class="ito-step-dot is-pass">✓</div>`;
-          } else if (state === "done" && status === "fail") {
-            dot = `<div class="ito-step-dot is-fail">✕</div>`;
+        function shotsHtml(shots, isDone, isFail) {
+          var h = '<div class="ito-shot-row">';
+          for (var i = 0; i < shots.length; i++) {
+            var id = shots[i];
+            if (id === "error") {
+              h += '<span class="ito-shot error"><span class="ito-shot-error-label">ERR</span></span>';
+            } else {
+              h += '<span class="ito-shot">' + (SHOT_SVGS[id] || "") + "</span>";
+            }
+          }
+          return h + "</div>";
+        }
+
+        /* ━━━━━ SHELL BUILD ━━━━━ */
+
+        function buildShell() {
+          var prCards = PULL_REQUESTS.map(function (pr) {
+            return '<article class="ito-pr-card"><div class="ito-pr-icon">\u2387</div><div class="ito-pr-body">' +
+              '<div class="ito-pr-title">' + esc(pr.title) + "</div>" +
+              '<div class="ito-pr-branch">' + esc(pr.branch) + "</div>" +
+              '<div class="ito-pr-meta"><span>#' + esc(pr.id.replace("pr-","")) + "</span><span>" + pr.filesChanged + " files</span></div>" +
+              '<div class="ito-progress"><span></span></div>' +
+              '<div class="ito-pr-footer"><span>' + esc(pr.sha) + "</span><span>checking\u2026</span></div></div></article>";
+          }).join("");
+
+          var timelineSteps = STEPS.map(function (s, i) {
+            return '<article class="ito-step is-future" data-step-index="' + i + '">' +
+              '<div data-rail="' + i + '"></div>' +
+              '<div class="ito-step-card is-dim" data-card="' + i + '">' +
+                '<div class="ito-step-top"><div class="ito-step-title-wrap"><span data-icon="' + i + '"></span><span class="ito-step-title">' + esc(s.label) + '</span></div><div class="ito-step-status" data-status="' + i + '"></div></div>' +
+                '<div class="ito-step-sub' + (s.status==="fail"?" is-error":"") + '">' + esc(s.actionDetail) + '</div>' +
+                '<div data-expand="' + i + '"></div>' +
+              "</div></article>";
+          }).join("");
+
+          var reportRows = STEPS.map(function (s, i) {
+            return '<div class="ito-report-row is-muted" data-report="' + i + '"><div class="ito-report-left"><span class="ito-mini" data-ricon="' + i + '"></span><span>' + esc(s.label) + '</span></div><div class="ito-report-right" data-rright="' + i + '"></div></div>';
+          }).join("");
+
+          var pc = STEPS.filter(function(s){return s.status==="pass"}).length;
+          var fc = STEPS.filter(function(s){return s.status==="fail"}).length;
+
+          return '<section class="ito-stage-shell"><div class="ito-scale-wrap" data-ito-scale-wrap><div class="ito-scale-stage" data-ito-scale-stage><div class="ito-hero-frame">' +
+            '<div class="ito-hero-topbar"><span class="ito-kicker">Automated QA</span><div class="ito-live"><span class="ito-live-dot"></span><span>Live</span></div></div>' +
+            '<div class="ito-hero-grid">' +
+              '<aside class="ito-col ito-col-left"><div class="ito-col-head">Pull Requests</div><div class="ito-pr-list">' + prCards +
+                '<article class="ito-pr-skeleton"><div class="ito-pr-skeleton-dot"></div><div class="ito-pr-skeleton-lines"><span></span><span></span></div></article>' +
+              '</div><div class="ito-run-meta"><span class="ito-run-spinner"></span><span>ito-agent \u00b7 run #88241</span></div></aside>' +
+              '<main class="ito-col ito-col-center"><div class="ito-center-main">' +
+                '<div class="ito-col-head ito-col-head-split"><span>Agent Timeline</span><div class="ito-head-progress"><span data-step-counter>step 1/' + STEPS.length + '</span><div class="ito-progress ito-progress-short"><span data-step-progress style="width:0%"></span></div></div></div>' +
+                '<div class="ito-timeline-viewport" data-timeline-viewport><div class="ito-timeline-track" data-timeline-track>' + timelineSteps + '</div></div>' +
+                '<div class="ito-statusbar"><div class="ito-status-left"><span class="ito-run-spinner"></span><span data-status-label>Initialising\u2026</span></div><span>ito-agent</span></div>' +
+              '</div></main>' +
+              '<aside class="ito-col ito-col-right"><div class="ito-col-head">QA Report</div>' +
+                '<div class="ito-report-summary"><div class="ito-report-summary-top"><span>Coverage</span><strong data-coverage>0%</strong></div><div class="ito-progress"><span data-coverage-bar style="width:0%"></span></div><div class="ito-report-summary-bottom"><span>#run-88241</span><span data-elapsed>\u2014</span></div></div>' +
+                '<div class="ito-report-list">' + reportRows + '</div>' +
+                '<div class="ito-report-footer"><div class="ito-metrics"><div><p>Total</p><strong>' + STEPS.length + '</strong></div><div class="is-bordered"><p>Passed</p><strong class="is-pass">' + pc + '</strong></div><div><p>Failed</p><strong class="is-fail">' + fc + '</strong></div></div><button class="ito-rerun-btn" type="button">Re-run suite</button></div>' +
+              '</aside>' +
+            '</div>' +
+            '<div class="ito-hero-bottombar"><span>ito \u00b7 qa engine</span><div class="ito-bottom-right"><span>2 PRs \u00b7 4 tests \u00b7 1 failure</span><span class="ito-connected"><i></i>Connected</span></div></div>' +
+          '</div></div></div></section>';
+        }
+
+        /* ━━━━━ DIFFERENTIAL UPDATE ━━━━━
+           activeIndex: 0..STEPS.length-1 = running that step
+                        STEPS.length      = "complete" — all done, all collapsed
+        */
+
+        function updateState(root, activeIndex) {
+          var isComplete = activeIndex >= STEPS.length;
+          var safeIndex = clamp(activeIndex, 0, STEPS.length);
+          var progress = clamp(Math.round((safeIndex / STEPS.length) * 100), 0, 100);
+
+          var counter = root.querySelector("[data-step-counter]");
+          if (counter) counter.textContent = "step " + (isComplete ? STEPS.length : clamp(safeIndex, 1, STEPS.length)) + "/" + STEPS.length;
+
+          var progBar = root.querySelector("[data-step-progress]");
+          if (progBar) progBar.style.width = progress + "%";
+
+          var label = root.querySelector("[data-status-label]");
+          if (label) {
+            label.textContent = isComplete
+              ? "Run complete"
+              : safeIndex === 0
+                ? "Initialising\u2026"
+                : "Executing: " + STEPS[Math.min(safeIndex - 1, STEPS.length - 1)].label;
           }
 
-          return `
-            <div class="ito-step-rail">
-              ${dot}
-              ${
-                isLast
-                  ? ""
-                  : `<div class="ito-step-line ${
-                      state === "done" ? "is-done" : ""
-                    }"></div>`
+          var cov = root.querySelector("[data-coverage]");
+          if (cov) cov.textContent = progress + "%";
+          var covBar = root.querySelector("[data-coverage-bar]");
+          if (covBar) covBar.style.width = progress + "%";
+          var elapsed = root.querySelector("[data-elapsed]");
+          if (elapsed) elapsed.textContent = safeIndex > 0 ? (safeIndex * 2) + "s" : "\u2014";
+
+          for (var i = 0; i < STEPS.length; i++) {
+            var step = STEPS[i];
+            var isDone = safeIndex > i;
+            var isRunning = !isComplete && safeIndex === i;
+            var isFuture = safeIndex < i;
+            var stateStr = isRunning ? "running" : isDone ? "done" : "idle";
+            var isLast = i === STEPS.length - 1;
+
+            /* In "complete" state, all are done, none are running */
+            if (isComplete) {
+              isDone = true;
+              isRunning = false;
+              isFuture = false;
+              stateStr = "done";
+            }
+
+            var wrapper = root.querySelector('[data-step-index="' + i + '"]');
+            if (wrapper) {
+              wrapper.className = "ito-step" +
+                (isDone ? " is-complete" : "") +
+                (isRunning ? " is-active" : "") +
+                (isFuture ? " is-future" : "");
+            }
+
+            var railSlot = root.querySelector('[data-rail="' + i + '"]');
+            if (railSlot) {
+              var nr = stepRailHtml(stateStr, step.status, isLast);
+              if (railSlot.innerHTML !== nr) railSlot.innerHTML = nr;
+            }
+
+            var card = root.querySelector('[data-card="' + i + '"]');
+            if (card) {
+              card.className = "ito-step-card" +
+                (isRunning ? " is-active" : "") +
+                (isFuture ? " is-dim" : "") +
+                (isDone && step.status === "fail" ? " is-fail" : "");
+            }
+
+            var iconSlot = root.querySelector('[data-icon="' + i + '"]');
+            if (iconSlot) {
+              var ni = stepIconHtml(step.actionType, stateStr);
+              if (iconSlot.outerHTML !== ni) iconSlot.outerHTML = ni.replace(">", ' data-icon="' + i + '">');
+            }
+
+            var statusSlot = root.querySelector('[data-status="' + i + '"]');
+            if (statusSlot) {
+              if (isRunning) {
+                statusSlot.innerHTML = "<span>running\u2026</span>";
+              } else if (isDone) {
+                statusSlot.innerHTML = "<span>" + esc(step.duration) + '</span> <span class="' + (step.status==="pass"?"is-pass":"is-fail") + '">' + esc(step.status) + "</span>";
+              } else {
+                statusSlot.innerHTML = "";
               }
-            </div>
-          `;
+            }
+
+            /* Expand: show when running or done-but-not-complete.
+               In complete state, collapse everything. */
+            var expandSlot = root.querySelector('[data-expand="' + i + '"]');
+            if (expandSlot) {
+              var showExpand = !isComplete && (isDone || isRunning);
+              if (showExpand && !expandSlot.hasChildNodes()) {
+                expandSlot.innerHTML = '<div class="ito-step-expand">' +
+                  shotsHtml(step.shots, isDone, step.status === "fail") +
+                  '<pre class="ito-code"><code>' + esc(step.codeSnippet) + "</code></pre></div>";
+              } else if (!showExpand && expandSlot.hasChildNodes()) {
+                expandSlot.innerHTML = "";
+              }
+            }
+
+            /* Report */
+            var reportRow = root.querySelector('[data-report="' + i + '"]');
+            if (reportRow) {
+              reportRow.className = "ito-report-row" +
+                (isRunning ? " is-current" : "") +
+                (isFuture ? " is-muted" : "");
+            }
+
+            var ricon = root.querySelector('[data-ricon="' + i + '"]');
+            if (ricon) {
+              if (isRunning) {
+                ricon.className = "ito-mini active";
+                ricon.textContent = "";
+              } else if (isDone && step.status === "pass") {
+                ricon.className = "ito-mini pass";
+                ricon.textContent = "\u2713";
+              } else if (isDone && step.status === "fail") {
+                ricon.className = "ito-mini fail";
+                ricon.textContent = "\u2715";
+              } else {
+                ricon.className = "ito-mini";
+                ricon.textContent = "";
+              }
+            }
+
+            var rright = root.querySelector('[data-rright="' + i + '"]');
+            if (rright) {
+              if (isDone) {
+                rright.innerHTML = "<span>" + esc(step.duration) + '</span> <span class="' + (step.status==="pass"?"is-pass":"is-fail") + '">' + esc(step.status) + "</span>";
+              } else {
+                rright.innerHTML = "";
+              }
+            }
+          }
         }
 
-        function getShotsHtml(shots, isDone, isFail) {
-          return `
-            <div class="ito-shot-row">
-              ${shots
-                .map(function (shot) {
-                  const errorLabel =
-                    shot === "error" && isFail
-                      ? `<span class="ito-shot-error-label">ERR</span>`
-                      : "";
-                  return `<span class="ito-shot ${shot} ${
-                    isDone ? "is-done" : ""
-                  }">${errorLabel}</span>`;
-                })
-                .join("")}
-            </div>
-          `;
-        }
-
-        function renderPullRequests() {
-          return PULL_REQUESTS.map(function (pr) {
-            return `
-              <article class="ito-pr-card">
-                <div class="ito-pr-icon">⎇</div>
-                <div class="ito-pr-body">
-                  <div class="ito-pr-title">${escapeHtml(pr.title)}</div>
-                  <div class="ito-pr-branch">${escapeHtml(pr.branch)}</div>
-                  <div class="ito-pr-meta">
-                    <span>#${escapeHtml(pr.id.replace("pr-", ""))}</span>
-                    <span>${pr.filesChanged} files</span>
-                  </div>
-                  <div class="ito-progress"><span></span></div>
-                  <div class="ito-pr-footer">
-                    <span>${escapeHtml(pr.sha)}</span>
-                    <span>checking…</span>
-                  </div>
-                </div>
-              </article>
-            `;
-          }).join("");
-        }
-
-        function renderTimeline(activeIndex) {
-          return STEPS.map(function (step, index) {
-            const isLast = index === STEPS.length - 1;
-            const isDone = activeIndex > index;
-            const isRunning = activeIndex === index;
-            const isFuture = activeIndex < index;
-
-            const cardClass = [
-              "ito-step-card",
-              isRunning ? "is-active" : "",
-              isFuture ? "is-dim" : "",
-              isDone && step.status === "fail" ? "is-fail" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
-
-            const wrapperClass = [
-              "ito-step",
-              isDone ? "is-complete" : "",
-              isRunning ? "is-active" : "",
-              isFuture ? "is-future" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
-
-            const showExpanded = isDone || isRunning;
-            const rightStatus = isRunning
-              ? `<span>running…</span>`
-              : isDone
-              ? `
-                  <span>${escapeHtml(step.duration)}</span>
-                  <span class="${
-                    step.status === "pass" ? "is-pass" : "is-fail"
-                  }">${escapeHtml(step.status)}</span>
-                `
-              : "";
-
-            return `
-              <article class="${wrapperClass}" data-step-index="${index}">
-                ${getStepRail(
-                  isRunning ? "running" : isDone ? "done" : "idle",
-                  step.status,
-                  isLast
-                )}
-                <div class="${cardClass}">
-                  <div class="ito-step-top">
-                    <div class="ito-step-title-wrap">
-                      ${getStepIcon(
-                        step.actionType,
-                        isRunning ? "running" : isDone ? "done" : "idle"
-                      )}
-                      <span class="ito-step-title">${escapeHtml(
-                        step.label
-                      )}</span>
-                    </div>
-                    <div class="ito-step-status">${rightStatus}</div>
-                  </div>
-
-                  <div class="ito-step-sub ${
-                    step.status === "fail" ? "is-error" : ""
-                  }">
-                    ${escapeHtml(step.actionDetail)}
-                  </div>
-
-                  ${
-                    showExpanded
-                      ? `
-                        <div class="ito-step-expand">
-                          ${getShotsHtml(
-                            step.shots,
-                            isDone,
-                            step.status === "fail"
-                          )}
-                          <pre class="ito-code"><code>${escapeHtml(
-                            step.codeSnippet
-                          )}</code></pre>
-                        </div>
-                      `
-                      : ""
-                  }
-                </div>
-              </article>
-            `;
-          }).join("");
-        }
-
-        function renderReport(activeIndex) {
-          return STEPS.map(function (step, index) {
-            const isDone = activeIndex > index;
-            const isRunning = activeIndex === index;
-            const isFuture = activeIndex < index;
-
-            const rowClass = [
-              "ito-report-row",
-              isRunning ? "is-current" : "",
-              isFuture ? "is-muted" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
-
-            const leftIcon = isRunning
-              ? `<span class="ito-mini active"></span>`
-              : isDone && step.status === "pass"
-              ? `<span class="ito-mini pass">✓</span>`
-              : isDone && step.status === "fail"
-              ? `<span class="ito-mini fail">✕</span>`
-              : `<span class="ito-mini"></span>`;
-
-            const right = isDone
-              ? `
-                <div class="ito-report-right">
-                  <span>${escapeHtml(step.duration)}</span>
-                  <span class="${
-                    step.status === "pass" ? "is-pass" : "is-fail"
-                  }">${escapeHtml(step.status)}</span>
-                </div>
-              `
-              : "";
-
-            return `
-              <div class="${rowClass}">
-                <div class="ito-report-left">
-                  ${leftIcon}
-                  <span>${escapeHtml(step.label)}</span>
-                </div>
-                ${right}
-              </div>
-            `;
-          }).join("");
-        }
-
-        function renderHero(stepIndex) {
-          const safeIndex = Math.max(0, Math.min(stepIndex, STEPS.length));
-          const progress = Math.max(
-            0,
-            Math.min(Math.round((safeIndex / STEPS.length) * 100), 100)
-          );
-
-          const runningLabel =
-            safeIndex === 0
-              ? "Initialising…"
-              : safeIndex <= STEPS.length
-              ? "Executing: " +
-                STEPS[Math.min(safeIndex - 1, STEPS.length - 1)].label
-              : "Run complete";
-
-          return `
-            <section class="ito-stage-shell">
-              <div class="ito-scale-wrap" data-ito-scale-wrap>
-                <div class="ito-scale-stage" data-ito-scale-stage>
-                  <div class="ito-hero-frame">
-                    <div class="ito-hero-topbar">
-                      <span class="ito-kicker">Automated QA</span>
-                      <div class="ito-live">
-                        <span class="ito-live-dot"></span>
-                        <span>Live</span>
-                      </div>
-                    </div>
-
-                    <div class="ito-hero-grid">
-                      <aside class="ito-col ito-col-left">
-                        <div class="ito-col-head">Pull Requests</div>
-
-                        <div class="ito-pr-list">
-                          ${renderPullRequests()}
-                          <article class="ito-pr-skeleton">
-                            <div class="ito-pr-skeleton-dot"></div>
-                            <div class="ito-pr-skeleton-lines">
-                              <span></span>
-                              <span></span>
-                            </div>
-                          </article>
-                        </div>
-
-                        <div class="ito-run-meta">
-                          <span class="ito-run-spinner"></span>
-                          <span>ito-agent · run #88241</span>
-                        </div>
-                      </aside>
-
-                      <main class="ito-col ito-col-center">
-                        <div class="ito-center-main">
-                          <div class="ito-col-head ito-col-head-split">
-                            <span>Agent Timeline</span>
-                            <div class="ito-head-progress">
-                              <span>step ${Math.min(
-                                Math.max(safeIndex, 1),
-                                STEPS.length
-                              )}/${STEPS.length}</span>
-                              <div class="ito-progress ito-progress-short">
-                                <span style="width:${progress}%"></span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div
-                            class="ito-timeline-viewport"
-                            data-timeline-viewport
-                          >
-                            <div class="ito-timeline-track" data-timeline-track>
-                              ${renderTimeline(safeIndex)}
-                            </div>
-                          </div>
-
-                          <div class="ito-statusbar">
-                            <div class="ito-status-left">
-                              <span class="ito-run-spinner"></span>
-                              <span>${escapeHtml(runningLabel)}</span>
-                            </div>
-                            <span>ito-agent</span>
-                          </div>
-                        </div>
-                      </main>
-
-                      <aside class="ito-col ito-col-right">
-                        <div class="ito-col-head">QA Report</div>
-
-                        <div class="ito-report-summary">
-                          <div class="ito-report-summary-top">
-                            <span>Coverage</span>
-                            <strong>${progress}%</strong>
-                          </div>
-
-                          <div class="ito-progress">
-                            <span style="width:${progress}%"></span>
-                          </div>
-
-                          <div class="ito-report-summary-bottom">
-                            <span>#run-88241</span>
-                            <span>${safeIndex > 0 ? safeIndex * 2 + "s" : "—"}</span>
-                          </div>
-                        </div>
-
-                        <div class="ito-report-list">
-                          ${renderReport(safeIndex)}
-                        </div>
-
-                        <div class="ito-report-footer">
-                          <div class="ito-metrics">
-                            <div>
-                              <p>Total</p>
-                              <strong>${STEPS.length}</strong>
-                            </div>
-                            <div class="is-bordered">
-                              <p>Passed</p>
-                              <strong class="is-pass">${
-                                STEPS.filter(function (s) {
-                                  return s.status === "pass";
-                                }).length
-                              }</strong>
-                            </div>
-                            <div>
-                              <p>Failed</p>
-                              <strong class="is-fail">${
-                                STEPS.filter(function (s) {
-                                  return s.status === "fail";
-                                }).length
-                              }</strong>
-                            </div>
-                          </div>
-
-                          <button class="ito-rerun-btn" type="button">
-                            Re-run suite
-                          </button>
-                        </div>
-                      </aside>
-                    </div>
-
-                    <div class="ito-hero-bottombar">
-                      <span>ito · qa engine</span>
-                      <div class="ito-bottom-right">
-                        <span>2 PRs · 4 tests · 1 failure</span>
-                        <span class="ito-connected"><i></i>Connected</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          `;
-        }
+        /* ━━━━━ HELPERS ━━━━━ */
 
         function updateScale(root) {
-          const shell = root.querySelector(".ito-stage-shell");
-          const wrap = root.querySelector("[data-ito-scale-wrap]");
-          const stage = root.querySelector("[data-ito-scale-stage]");
-
+          var shell = root.querySelector(".ito-stage-shell");
+          var wrap = root.querySelector("[data-ito-scale-wrap]");
+          var stage = root.querySelector("[data-ito-scale-stage]");
           if (!shell || !wrap || !stage) return;
-
-          const padding = getShellPadding();
-          shell.style.padding = padding + "px";
-
-          const availableWidth = Math.max(320, wrap.clientWidth);
-          const scale = Math.min(1, availableWidth / BASE_WIDTH);
-          const scaledHeight = Math.round(BASE_HEIGHT * scale);
-
+          shell.style.padding = getShellPadding() + "px";
+          var avail = Math.max(320, wrap.clientWidth);
+          var scale = Math.min(1, avail / BASE_WIDTH);
           stage.style.transform = "scale(" + scale + ")";
-          wrap.style.height = scaledHeight + "px";
+          wrap.style.height = Math.round(BASE_HEIGHT * scale) + "px";
         }
 
-        function updateTimelinePosition(root) {
-          const viewport = root.querySelector("[data-timeline-viewport]");
-          const track = root.querySelector("[data-timeline-track]");
-          const active = root.querySelector(".ito-step.is-active");
-
+        function updateTimelinePosition(root, forceTop) {
+          var viewport = root.querySelector("[data-timeline-viewport]");
+          var track = root.querySelector("[data-timeline-track]");
           if (!viewport || !track) return;
 
+          if (forceTop) {
+            track.style.transform = "translateY(0px)";
+            return;
+          }
+
+          var active = root.querySelector(".ito-step.is-active");
           if (!active) {
             track.style.transform = "translateY(0px)";
             return;
           }
 
-          const viewportHeight = viewport.clientHeight;
-          const activeTop = active.offsetTop;
-          const activeHeight = active.offsetHeight;
-          const activeCenter = activeTop + activeHeight / 2;
-          const targetY = Math.max(0, activeCenter - viewportHeight / 2);
-          const maxY = Math.max(0, track.scrollHeight - viewportHeight);
-          const clampedY = Math.min(targetY, maxY);
-
-          track.style.transform = "translateY(-" + clampedY + "px)";
+          var vh = viewport.clientHeight;
+          var target = Math.max(0, active.offsetTop - vh * 0.22);
+          var maxY = Math.max(0, track.scrollHeight - vh);
+          track.style.transform = "translateY(-" + Math.min(target, maxY) + "px)";
         }
 
-        function preventUserScrollInside(root) {
-          function stopEvent(event) {
-            if (!event.target || !root.contains(event.target)) return;
-            event.preventDefault();
-          }
-
-          root.__itoStopScroll = stopEvent;
-          root.addEventListener("wheel", stopEvent, { passive: false });
-          root.addEventListener("touchmove", stopEvent, { passive: false });
+        function preventScroll(root) {
+          function stop(e) { if (root.contains(e.target)) e.preventDefault(); }
+          root._itoStop = stop;
+          root.addEventListener("wheel", stop, { passive: false });
+          root.addEventListener("touchmove", stop, { passive: false });
         }
+
+        /* ━━━━━ LIFECYCLE ━━━━━ */
 
         function cleanup(root) {
           if (!root) return;
-
-          if (typeof root.__itoCleanup === "function") {
-            root.__itoCleanup();
+          if (root._itoClean) root._itoClean();
+          if (root._itoStop) {
+            root.removeEventListener("wheel", root._itoStop);
+            root.removeEventListener("touchmove", root._itoStop);
           }
-
-          if (root.__itoStopScroll) {
-            root.removeEventListener("wheel", root.__itoStopScroll);
-            root.removeEventListener("touchmove", root.__itoStopScroll);
-            root.__itoStopScroll = null;
-          }
-
-          if (root.__itoResizeHandler) {
-            window.removeEventListener("resize", root.__itoResizeHandler);
-            root.__itoResizeHandler = null;
-          }
-
-          if (root.__itoResizeObserver) {
-            root.__itoResizeObserver.disconnect();
-            root.__itoResizeObserver = null;
-          }
+          if (root._itoResize) window.removeEventListener("resize", root._itoResize);
+          if (root._itoRO) root._itoRO.disconnect();
         }
 
-        function startHeroAnimation(root) {
-          let stepIndex = 0;
-          let intervalId = null;
-          let restartTimeoutId = null;
-          let isRestarting = false;
+        /* Animation state machine:
+           stepIndex 0 → STEPS.length-1: each step running
+           stepIndex STEPS.length: "complete" state (all collapsed, scroll to top)
+           Then after COMPLETE_PAUSE → reset to 0
+        */
 
-          function render() {
-            root.innerHTML = renderHero(stepIndex);
-            updateScale(root);
-            updateTimelinePosition(root);
+        function startAnimation(root) {
+          var stepIndex = 0;
+          var intervalId = null;
+          var completeTimeoutId = null;
+          var restartTimeoutId = null;
+          var restarting = false;
+
+          root.innerHTML = buildShell();
+          updateState(root, 0);
+          updateScale(root);
+          updateTimelinePosition(root, false);
+
+          function scheduleScroll(forceTop) {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                updateTimelinePosition(root, forceTop);
+              });
+            });
+          }
+
+          function tick() {
+            stepIndex++;
+
+            if (stepIndex <= STEPS.length - 1) {
+              /* Still stepping through */
+              updateState(root, stepIndex);
+              scheduleScroll(false);
+            } else if (stepIndex === STEPS.length) {
+              /* Last step just finished → show "complete" collapsed view */
+              clearInterval(intervalId);
+              updateState(root, STEPS.length);
+              scheduleScroll(true); /* scroll to top so all 4 compact cards are visible */
+
+              completeTimeoutId = setTimeout(function () {
+                restart();
+              }, COMPLETE_PAUSE);
+            }
           }
 
           function startLoop() {
             clearInterval(intervalId);
-            intervalId = setInterval(function () {
-              stepIndex = (stepIndex + 1) % (STEPS.length + 2);
-              render();
-            }, STEP_INTERVAL);
+            intervalId = setInterval(tick, STEP_INTERVAL);
           }
 
           function restart() {
-            if (isRestarting) return;
-            isRestarting = true;
-
+            if (restarting) return;
+            restarting = true;
             clearInterval(intervalId);
+            clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
 
             stepIndex = 0;
-            render();
+            updateState(root, 0);
+            scheduleScroll(false);
 
             restartTimeoutId = setTimeout(function () {
               startLoop();
-              isRestarting = false;
+              restarting = false;
             }, RESTART_DELAY);
           }
 
-          root.addEventListener("click", function (event) {
-            const button = event.target.closest(".ito-rerun-btn");
-            if (!button) return;
-            restart();
+          root.addEventListener("click", function (e) {
+            if (e.target.closest(".ito-rerun-btn")) restart();
           });
 
-          render();
           startLoop();
 
-          root.__itoCleanup = function () {
+          root._itoClean = function () {
             clearInterval(intervalId);
+            clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
           };
         }
 
-        function mountHero() {
-          const root = document.getElementById("root");
+        function mount() {
+          var root = document.getElementById("root");
           if (!root) return;
-
           cleanup(root);
-          preventUserScrollInside(root);
-          startHeroAnimation(root);
+          preventScroll(root);
+          startAnimation(root);
 
-          root.__itoResizeHandler = function () {
+          root._itoResize = function () {
             updateScale(root);
-            updateTimelinePosition(root);
+            updateTimelinePosition(root, false);
           };
-
-          window.addEventListener("resize", root.__itoResizeHandler, {
-            passive: true,
-          });
-
+          window.addEventListener("resize", root._itoResize, { passive: true });
           if ("ResizeObserver" in window) {
-            root.__itoResizeObserver = new ResizeObserver(function () {
-              updateScale(root);
-              updateTimelinePosition(root);
-            });
-            root.__itoResizeObserver.observe(root);
+            root._itoRO = new ResizeObserver(root._itoResize);
+            root._itoRO.observe(root);
           }
-
           updateScale(root);
-          updateTimelinePosition(root);
         }
 
         if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", mountHero);
+          document.addEventListener("DOMContentLoaded", mount);
         } else {
-          mountHero();
+          mount();
         }
       })();
     </script>
