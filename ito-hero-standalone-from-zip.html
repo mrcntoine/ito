@@ -187,10 +187,10 @@ textarea {
   padding: 18px;
   overflow: hidden;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(12px);
   transition:
-    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ito-col.is-visible {
@@ -475,18 +475,12 @@ textarea {
 }
 
 .ito-step-icon-running {
-  background: #111111;
-  position: relative;
-}
-
-.ito-step-icon-running::after {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #ffffff;
-  animation: ito-spin 0.85s linear infinite;
+  background: transparent;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #d8d8d8;
+  border-top-color: #111111;
+  animation: ito-spin 0.9s linear infinite;
 }
 
 .ito-step-title {
@@ -901,9 +895,6 @@ textarea {
             return '<div class="ito-report-row is-muted" data-report="' + i + '"><div class="ito-report-left"><span class="ito-mini" data-ricon="' + i + '"></span><span>' + esc(s.label) + '</span></div><div class="ito-report-right" data-rright="' + i + '"></div></div>';
           }).join("");
 
-          var pc = STEPS.filter(function(s){return s.status==="pass"}).length;
-          var fc = STEPS.filter(function(s){return s.status==="fail"}).length;
-
           return '<section class="ito-stage-shell"><div class="ito-scale-wrap" data-ito-scale-wrap><div class="ito-scale-stage" data-ito-scale-stage><div class="ito-hero-frame">' +
             '<div class="ito-hero-topbar"><span class="ito-kicker">Automated QA</span><div class="ito-live"><span class="ito-live-dot"></span><span>Live</span></div></div>' +
             '<div class="ito-hero-grid">' +
@@ -918,7 +909,7 @@ textarea {
               '<aside class="ito-col ito-col-right"><div class="ito-col-head">QA Report</div>' +
                 '<div class="ito-report-summary"><div class="ito-report-summary-top"><span>Coverage</span><strong data-coverage>0%</strong></div><div class="ito-progress"><span data-coverage-bar style="width:0%"></span></div><div class="ito-report-summary-bottom"><span>#run-88241</span><span data-elapsed>\u2014</span></div></div>' +
                 '<div class="ito-report-list">' + reportRows + '</div>' +
-                '<div class="ito-report-footer"><div class="ito-metrics"><div><p>Total</p><strong>' + STEPS.length + '</strong></div><div class="is-bordered"><p>Passed</p><strong class="is-pass">' + pc + '</strong></div><div><p>Failed</p><strong class="is-fail">' + fc + '</strong></div></div><button class="ito-rerun-btn" type="button">Re-run suite</button></div>' +
+                '<div class="ito-report-footer"><div class="ito-metrics"><div><p>Total</p><strong data-metric-total>0</strong></div><div class="is-bordered"><p>Passed</p><strong class="is-pass" data-metric-pass>0</strong></div><div><p>Failed</p><strong class="is-fail" data-metric-fail>0</strong></div></div><button class="ito-rerun-btn" type="button">Re-run suite</button></div>' +
               '</aside>' +
             '</div>' +
             '<div class="ito-hero-bottombar"><span>ito \u00b7 qa engine</span><div class="ito-bottom-right"><span>2 PRs \u00b7 4 tests \u00b7 1 failure</span><span class="ito-connected"><i></i>Connected</span></div></div>' +
@@ -1054,6 +1045,23 @@ textarea {
               }
             }
           }
+
+          /* metrics — count completed steps */
+          var doneCount = 0, passCount = 0, failCount = 0;
+          for (var j = 0; j < STEPS.length; j++) {
+            var jDone = isComplete || safeIndex > j;
+            if (jDone) {
+              doneCount++;
+              if (STEPS[j].status === "pass") passCount++;
+              else failCount++;
+            }
+          }
+          var mTotal = root.querySelector("[data-metric-total]");
+          var mPass = root.querySelector("[data-metric-pass]");
+          var mFail = root.querySelector("[data-metric-fail]");
+          if (mTotal) mTotal.textContent = doneCount;
+          if (mPass) mPass.textContent = passCount;
+          if (mFail) mFail.textContent = failCount;
         }
 
         /* ━━━━━ HELPERS ━━━━━ */
@@ -1118,9 +1126,9 @@ textarea {
            outro: fade all 3 columns out simultaneously, then restart
         */
 
-        var INTRO_STAGGER = 220;  /* ms between each column fade-in */
-        var INTRO_LEAD = 250;     /* ms before first column appears */
-        var FADE_OUT_DURATION = 700; /* matches CSS transition on .ito-col */
+        var INTRO_STAGGER = 150;  /* ms between each column fade-in */
+        var INTRO_LEAD = 300;     /* ms before first column appears */
+        var FADE_OUT_DURATION = 450; /* matches CSS transition on .ito-col */
 
         function startAnimation(root) {
           var stepIndex = 0;
