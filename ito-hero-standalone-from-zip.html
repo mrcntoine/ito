@@ -159,8 +159,7 @@ textarea {
 .ito-live-dot,
 .ito-connected i,
 .ito-run-spinner,
-.ito-mini.active,
-.ito-spinner-ring {
+.ito-mini.active {
   display: inline-block;
   border-radius: 999px;
 }
@@ -382,77 +381,8 @@ textarea {
 }
 
 .ito-step {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
+  display: block;
 }
-
-.ito-step-rail {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100%;
-  padding-top: 10px;
-}
-
-/* ── RAIL DOT ── */
-
-.ito-step-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: #f1f1f1;
-  border: 1px solid var(--border-strong);
-  flex: 0 0 auto;
-  transition:
-    background-color var(--duration-base) var(--ease-morph),
-    border-color var(--duration-base) var(--ease-morph),
-    box-shadow var(--duration-base) var(--ease-morph);
-}
-
-.ito-step-dot.is-pass,
-.ito-step-dot.is-fail,
-.ito-step-dot.is-active {
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 9px;
-  font-weight: 700;
-  border: 1px solid transparent;
-}
-
-.ito-step-dot.is-pass { background: var(--success); }
-.ito-step-dot.is-fail { background: var(--danger); }
-
-.ito-step-dot.is-active {
-  width: 18px;
-  height: 18px;
-  background: #111111;
-  position: relative;
-  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
-  animation: ito-dot-pulse 2.4s ease-in-out infinite;
-}
-
-.ito-spinner-ring {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  border-top-color: #ffffff;
-  animation: ito-spin 0.85s linear infinite;
-}
-
-.ito-step-line {
-  width: 1px;
-  flex: 1 1 auto;
-  min-height: 42px;
-  margin-top: 6px;
-  background: var(--border-soft);
-  transition: background-color var(--duration-base) var(--ease-morph);
-}
-
-.ito-step-line.is-done { background: var(--border-strong); }
 
 /* ━━━━━ STEP CARD ━━━━━ */
 
@@ -801,11 +731,6 @@ textarea {
   100% { background-position: -200% 0; }
 }
 
-@keyframes ito-dot-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08); }
-  50% { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.14); }
-}
-
 /* ━━━━━ REDUCED MOTION ━━━━━ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -931,16 +856,6 @@ textarea {
           return '<span class="ito-step-icon">' + (m[type] || "\u2022") + "</span>";
         }
 
-        function stepRailHtml(state, status, isLast) {
-          var dot;
-          if (state === "running") dot = '<div class="ito-step-dot is-active"><span class="ito-spinner-ring"></span></div>';
-          else if (state === "done" && status === "pass") dot = '<div class="ito-step-dot is-pass">\u2713</div>';
-          else if (state === "done" && status === "fail") dot = '<div class="ito-step-dot is-fail">\u2715</div>';
-          else dot = '<div class="ito-step-dot"></div>';
-          var line = isLast ? "" : '<div class="ito-step-line' + (state === "done" ? " is-done" : "") + '"></div>';
-          return '<div class="ito-step-rail">' + dot + line + "</div>";
-        }
-
         function shotsHtml(shots, isDone, isFail) {
           var h = '<div class="ito-shot-row">';
           for (var i = 0; i < shots.length; i++) {
@@ -968,7 +883,6 @@ textarea {
 
           var timelineSteps = STEPS.map(function (s, i) {
             return '<article class="ito-step is-future" data-step-index="' + i + '">' +
-              '<div data-rail="' + i + '"></div>' +
               '<div class="ito-step-card is-dim" data-card="' + i + '">' +
                 '<div class="ito-step-top"><div class="ito-step-title-wrap"><span data-icon="' + i + '"></span><span class="ito-step-title">' + esc(s.label) + '</span></div><div class="ito-step-status" data-status="' + i + '"></div></div>' +
                 '<div class="ito-step-sub' + (s.status==="fail"?" is-error":"") + '">' + esc(s.actionDetail) + '</div>' +
@@ -1058,12 +972,6 @@ textarea {
                 (isDone ? " is-complete" : "") +
                 (isRunning ? " is-active" : "") +
                 (isFuture ? " is-future" : "");
-            }
-
-            var railSlot = root.querySelector('[data-rail="' + i + '"]');
-            if (railSlot) {
-              var nr = stepRailHtml(stateStr, step.status, isLast);
-              if (railSlot.innerHTML !== nr) railSlot.innerHTML = nr;
             }
 
             var card = root.querySelector('[data-card="' + i + '"]');
@@ -1227,14 +1135,29 @@ textarea {
             stepIndex++;
 
             if (stepIndex <= STEPS.length - 1) {
-              /* Still stepping through */
               updateState(root, stepIndex);
               scheduleScroll(false);
             } else if (stepIndex === STEPS.length) {
-              /* Last step just finished → show "complete" collapsed view */
+              /* Last step finished → collapse to summary */
               clearInterval(intervalId);
               updateState(root, STEPS.length);
-              scheduleScroll(true); /* scroll to top so all 4 compact cards are visible */
+
+              /* Slide-up effect:
+                 1) Disable transition, push track below viewport
+                 2) Re-enable transition, animate to translateY(0) */
+              var track = root.querySelector("[data-timeline-track]");
+              var viewport = root.querySelector("[data-timeline-viewport]");
+              if (track && viewport) {
+                var vh = viewport.clientHeight;
+                track.style.transition = "none";
+                track.style.transform = "translateY(" + vh + "px)";
+                /* Force reflow so the jump takes effect before re-enabling transition */
+                track.offsetHeight;
+                track.style.transition = "";
+                requestAnimationFrame(function () {
+                  track.style.transform = "translateY(0px)";
+                });
+              }
 
               completeTimeoutId = setTimeout(function () {
                 restart();
