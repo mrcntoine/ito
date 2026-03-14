@@ -70,7 +70,7 @@ body,
 
 body {
   min-height: 100vh;
-  background-color: var(--background);
+  background-color: transparent;
   color: var(--foreground);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -92,7 +92,7 @@ textarea {
 .ito-stage-shell {
   width: 100%;
   overflow: hidden;
-  background: var(--background);
+  background: transparent;
   padding: 0;
 }
 
@@ -186,6 +186,16 @@ textarea {
   min-height: 0;
   padding: 18px;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ito-col.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .ito-col-center {
@@ -761,7 +771,6 @@ textarea {
         var SHELL_PADDING_MOBILE = 12;
         var STEP_INTERVAL = 3400;
         var COMPLETE_PAUSE = 3400;
-        var RESTART_DELAY = 450;
 
         var STEPS = [
           {
@@ -1103,19 +1112,33 @@ textarea {
         }
 
         /* Animation state machine:
+           intro: fade in columns left → center → right with stagger
            stepIndex 0 → STEPS.length-1: each step running
            stepIndex STEPS.length: "complete" state (all collapsed, scroll to top)
-           Then after COMPLETE_PAUSE → reset to 0
+           outro: fade all 3 columns out simultaneously, then restart
         */
+
+        var INTRO_STAGGER = 220;  /* ms between each column fade-in */
+        var INTRO_LEAD = 250;     /* ms before first column appears */
+        var FADE_OUT_DURATION = 700; /* matches CSS transition on .ito-col */
 
         function startAnimation(root) {
           var stepIndex = 0;
           var intervalId = null;
           var completeTimeoutId = null;
           var restartTimeoutId = null;
+          var introTimeouts = [];
           var restarting = false;
 
+          var colLeft = null;
+          var colCenter = null;
+          var colRight = null;
+
           root.innerHTML = buildShell();
+          colLeft = root.querySelector(".ito-col-left");
+          colCenter = root.querySelector(".ito-col-center");
+          colRight = root.querySelector(".ito-col-right");
+
           updateState(root, 0);
           updateScale(root);
           updateTimelinePosition(root, false);
@@ -1128,6 +1151,37 @@ textarea {
             });
           }
 
+          function clearIntroTimeouts() {
+            for (var i = 0; i < introTimeouts.length; i++) clearTimeout(introTimeouts[i]);
+            introTimeouts = [];
+          }
+
+          function showColumns(callback) {
+            /* Stagger: left, then center, then right */
+            introTimeouts.push(setTimeout(function () {
+              if (colLeft) colLeft.classList.add("is-visible");
+            }, INTRO_LEAD));
+
+            introTimeouts.push(setTimeout(function () {
+              if (colCenter) colCenter.classList.add("is-visible");
+            }, INTRO_LEAD + INTRO_STAGGER));
+
+            introTimeouts.push(setTimeout(function () {
+              if (colRight) colRight.classList.add("is-visible");
+              /* Start stepping after all columns are visible */
+              if (callback) callback();
+            }, INTRO_LEAD + INTRO_STAGGER * 2));
+          }
+
+          function hideColumns(callback) {
+            /* Fade all 3 out simultaneously */
+            if (colLeft) colLeft.classList.remove("is-visible");
+            if (colCenter) colCenter.classList.remove("is-visible");
+            if (colRight) colRight.classList.remove("is-visible");
+            /* Wait for the CSS transition to finish before callback */
+            restartTimeoutId = setTimeout(callback, FADE_OUT_DURATION);
+          }
+
           function tick() {
             stepIndex++;
 
@@ -1138,11 +1192,13 @@ textarea {
               /* Last step finished → collapse cards, scroll naturally to top */
               clearInterval(intervalId);
               updateState(root, STEPS.length);
-              /* Let the existing CSS transition on the track handle the scroll-up */
               scheduleScroll(true);
 
+              /* Show collapsed state, then fade out, then restart */
               completeTimeoutId = setTimeout(function () {
-                restart();
+                hideColumns(function () {
+                  doRestart();
+                });
               }, COMPLETE_PAUSE);
             }
           }
@@ -1152,33 +1208,45 @@ textarea {
             intervalId = setInterval(tick, STEP_INTERVAL);
           }
 
+          function doRestart() {
+            stepIndex = 0;
+            updateState(root, 0);
+            scheduleScroll(false);
+
+            showColumns(function () {
+              restarting = false;
+              startLoop();
+            });
+          }
+
           function restart() {
             if (restarting) return;
             restarting = true;
             clearInterval(intervalId);
             clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
+            clearIntroTimeouts();
 
-            stepIndex = 0;
-            updateState(root, 0);
-            scheduleScroll(false);
-
-            restartTimeoutId = setTimeout(function () {
-              startLoop();
-              restarting = false;
-            }, RESTART_DELAY);
+            /* If triggered by button, fade out then restart */
+            hideColumns(function () {
+              doRestart();
+            });
           }
 
           root.addEventListener("click", function (e) {
             if (e.target.closest(".ito-rerun-btn")) restart();
           });
 
-          startLoop();
+          /* Initial intro sequence */
+          showColumns(function () {
+            startLoop();
+          });
 
           root._itoClean = function () {
             clearInterval(intervalId);
             clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
+            clearIntroTimeouts();
           };
         }
 
