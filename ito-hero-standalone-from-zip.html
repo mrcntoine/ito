@@ -93,7 +93,7 @@ textarea {
   width: 100%;
   overflow: hidden;
   background: var(--background);
-  padding: 24px;
+  padding: 0;
 }
 
 .ito-scale-wrap {
@@ -744,8 +744,6 @@ textarea {
   .ito-progress > span { transition: none !important; }
 }
 
-@media (max-width: 991px) { .ito-stage-shell { padding: 16px; } }
-@media (max-width: 767px) { .ito-stage-shell { padding: 12px; } }
     </style>
   </head>
   <body>
@@ -1056,7 +1054,6 @@ textarea {
           var wrap = root.querySelector("[data-ito-scale-wrap]");
           var stage = root.querySelector("[data-ito-scale-stage]");
           if (!shell || !wrap || !stage) return;
-          shell.style.padding = getShellPadding() + "px";
           var avail = Math.max(320, wrap.clientWidth);
           var scale = Math.min(1, avail / BASE_WIDTH);
           stage.style.transform = "scale(" + scale + ")";
@@ -1138,26 +1135,11 @@ textarea {
               updateState(root, stepIndex);
               scheduleScroll(false);
             } else if (stepIndex === STEPS.length) {
-              /* Last step finished → collapse to summary */
+              /* Last step finished → collapse cards, scroll naturally to top */
               clearInterval(intervalId);
               updateState(root, STEPS.length);
-
-              /* Slide-up effect:
-                 1) Disable transition, push track below viewport
-                 2) Re-enable transition, animate to translateY(0) */
-              var track = root.querySelector("[data-timeline-track]");
-              var viewport = root.querySelector("[data-timeline-viewport]");
-              if (track && viewport) {
-                var vh = viewport.clientHeight;
-                track.style.transition = "none";
-                track.style.transform = "translateY(" + vh + "px)";
-                /* Force reflow so the jump takes effect before re-enabling transition */
-                track.offsetHeight;
-                track.style.transition = "";
-                requestAnimationFrame(function () {
-                  track.style.transform = "translateY(0px)";
-                });
-              }
+              /* Let the existing CSS transition on the track handle the scroll-up */
+              scheduleScroll(true);
 
               completeTimeoutId = setTimeout(function () {
                 restart();
