@@ -45,10 +45,10 @@
   --ease-morph: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-settle: cubic-bezier(0.33, 1, 0.68, 1);
 
-  --duration-fast: 180ms;
-  --duration-base: 320ms;
-  --duration-slow: 500ms;
-  --duration-scroll: 600ms;
+  --duration-fast: 270ms;
+  --duration-base: 480ms;
+  --duration-slow: 750ms;
+  --duration-scroll: 900ms;
 
   --font-body: "Inter", Arial, Helvetica, sans-serif;
 }
@@ -70,7 +70,7 @@ body,
 
 body {
   min-height: 100vh;
-  background-color: transparent;
+  background-color: #f8f8f8;
   color: var(--foreground);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -186,14 +186,24 @@ textarea {
   min-height: 0;
   padding: 18px;
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.ito-col.is-visible {
+/* Dim side columns during active timeline run */
+.ito-col.is-dimmed {
+  opacity: 0.3;
+}
+
+/* Individual content items fade in one by one */
+.ito-fadeable {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 675ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 675ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ito-fadeable.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -401,23 +411,22 @@ textarea {
   padding: 14px;
   background: var(--surface);
   transition:
-    opacity var(--duration-base) var(--ease-morph),
-    transform var(--duration-base) var(--ease-morph),
-    border-color var(--duration-base) var(--ease-morph),
-    background-color var(--duration-base) var(--ease-morph);
+    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 600ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
   transform: translateY(0);
 }
 
 .ito-step-card.is-active {
   border-color: var(--border-active);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .ito-step-card.is-dim {
-  opacity: 0.42;
   border-color: var(--border-soft);
-  transform: translateY(3px);
+  transform: translateY(2px);
 }
 
 .ito-step-card.is-fail {
@@ -515,14 +524,52 @@ textarea {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border-soft);
+  opacity: 1;
+  max-height: 400px;
+  overflow: hidden;
+  /* Opening transition: ease-out for natural reveal */
+  transition:
+    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    margin-top 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-top 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Opening: start collapsed, then transition to open */
+.ito-step-expand.is-opening {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-color: transparent;
+}
+
+.ito-step-expand.is-closing {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-color: transparent;
+  /* Closing transition: different rhythm — opacity leads, height follows */
+  transition:
+    opacity 500ms cubic-bezier(0.32, 0, 0.67, 0),
+    max-height 750ms cubic-bezier(0.32, 0.72, 0, 1),
+    margin-top 750ms cubic-bezier(0.32, 0.72, 0, 1),
+    padding-top 750ms cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 500ms cubic-bezier(0.32, 0, 0.67, 0);
 }
 
 .ito-step-expand .ito-shot-row {
-  animation: ito-fade-up 350ms var(--ease-out) both;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: ito-fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
 }
 
 .ito-step-expand .ito-code {
-  animation: ito-fade-up 350ms var(--ease-out) 80ms both;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: ito-fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) 480ms both;
 }
 
 /* ━━━━━ MINI SCREENSHOTS ━━━━━ */
@@ -534,9 +581,9 @@ textarea {
 }
 
 .ito-shot {
-  width: 64px;
-  height: 44px;
-  border-radius: 7px;
+  width: 80px;
+  height: 56px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   overflow: hidden;
   position: relative;
@@ -748,6 +795,8 @@ textarea {
   .ito-progress > span { transition: none !important; }
 }
 
+/* ━━━━━ CONTROLS PANEL ━━━━━ */
+
     </style>
   </head>
   <body>
@@ -760,11 +809,10 @@ textarea {
 
         var BASE_WIDTH = 1280;
         var BASE_HEIGHT = 760;
-        var SHELL_PADDING_DESKTOP = 24;
-        var SHELL_PADDING_TABLET = 16;
-        var SHELL_PADDING_MOBILE = 12;
-        var STEP_INTERVAL = 3400;
-        var COMPLETE_PAUSE = 3400;
+        var INTRO_LEAD = 450;
+        var FADE_OUT_DURATION = 675;
+        var STEP_INTERVAL = 5100;
+        var COMPLETE_PAUSE = 5100;
 
         var STEPS = [
           {
@@ -817,32 +865,221 @@ textarea {
         /* ── MINI-SCREENSHOT SVGs ── */
 
         var SHOT_SVGS = {
-          /* Auth flow — login form screens */
-          "auth-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8faff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="16" y="12" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="16" y="19" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="20" y="27" width="24" height="5" rx="2.5" fill="#3b82f6"/></svg>',
-          "auth-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8faff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="16" y="12" width="32" height="4" rx="2" fill="#bfdbfe"/><rect x="16" y="12" width="20" height="4" rx="2" fill="#93c5fd"/><rect x="16" y="19" width="32" height="4" rx="2" fill="#dbeafe"/><rect x="20" y="27" width="24" height="5" rx="2.5" fill="#3b82f6"/></svg>',
-          "auth-3": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f0fdf4"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="20" r="6" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/><rect x="30" y="18" width="4" height="4" rx="0" fill="none" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.5" y1="20.5" x2="31.5" y2="21.5" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/><line x1="31.5" y1="21.5" x2="34" y2="18" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round"/><rect x="18" y="30" width="28" height="3" rx="1.5" fill="#bbf7d0"/></svg>',
-          /* Cart — product list screens */
-          "cart-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8fdf8"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="4" y="10" width="12" height="10" rx="2" fill="#dcfce7"/><rect x="19" y="11" width="22" height="2.5" rx="1" fill="#333"/><rect x="19" y="15.5" width="14" height="2" rx="1" fill="#aaa"/><rect x="4" y="23" width="12" height="10" rx="2" fill="#dcfce7"/><rect x="19" y="24" width="18" height="2.5" rx="1" fill="#333"/><rect x="19" y="28.5" width="10" height="2" rx="1" fill="#aaa"/><rect x="4" y="36" width="12" height="5" rx="2" fill="#dcfce7"/><rect x="19" y="37" width="20" height="2.5" rx="1" fill="#333"/></svg>',
-          "cart-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f8fdf8"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="4" y="10" width="56" height="1" fill="#e5e7eb"/><rect x="4" y="14" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="14" width="16" height="2" rx="1" fill="#888"/><rect x="4" y="20" width="56" height="1" fill="#f0f0f0"/><rect x="4" y="24" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="24" width="16" height="2" rx="1" fill="#888"/><rect x="4" y="30" width="56" height="1" fill="#f0f0f0"/><rect x="4" y="34" width="20" height="2" rx="1" fill="#888"/><rect x="44" y="34" width="16" height="2" rx="1" fill="#16a34a"/></svg>',
-          /* Payment — checkout form screens */
-          "pay-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#fffafa"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="8" y="11" width="48" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="11" y="13.5" width="30" height="2.5" rx="1" fill="#fca5a5"/><rect x="8" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="33" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="16" y="35" width="32" height="5" rx="2.5" fill="#111"/></svg>',
-          "pay-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#fffafa"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><rect x="8" y="11" width="48" height="8" rx="3" fill="#fff" stroke="#fca5a5" stroke-width="1"/><rect x="8" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="33" y="23" width="23" height="8" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/><rect x="8" y="33" width="48" height="2" rx="1" fill="#fecaca"/></svg>',
-          /* Confirmation — email screens */
-          "confirm-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#faf8ff"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="16" r="5" fill="#f3e8ff" stroke="#a855f7" stroke-width="0.8"/><rect x="30" y="14.5" width="4" height="3" rx="0" fill="none" stroke="#a855f7" stroke-width="0.8"/><rect x="14" y="25" width="36" height="2.5" rx="1" fill="#333"/><rect x="18" y="30" width="28" height="2" rx="1" fill="#aaa"/><rect x="20" y="35" width="24" height="2" rx="1" fill="#aaa"/></svg>',
-          "confirm-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="44" fill="#f0fdf4"/><rect x="4" y="3" width="56" height="3" rx="1.5" fill="#e2e8f0"/><circle cx="32" cy="18" r="7" fill="#dcfce7" stroke="#16a34a" stroke-width="0.8"/><line x1="29" y1="18" x2="31" y2="20.5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><line x1="31" y1="20.5" x2="35.5" y2="15" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><rect x="16" y="29" width="32" height="2.5" rx="1" fill="#333"/><rect x="20" y="34" width="24" height="2" rx="1" fill="#aaa"/></svg>',
+          /* Auth flow — login page progression */
+          "auth-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            /* top nav bar */
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            '<rect x="48" y="1.5" width="5" height="2" rx="1" fill="#ddd"/><rect x="55" y="1.5" width="6" height="2" rx="1" fill="#3b82f6"/>' +
+            /* card container */
+            '<rect x="14" y="9" width="36" height="30" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
+            /* heading */
+            '<rect x="22" y="12" width="20" height="2" rx="1" fill="#222"/>' +
+            '<rect x="25" y="15.5" width="14" height="1.5" rx=".75" fill="#aaa"/>' +
+            /* email label + field */
+            '<rect x="18" y="20" width="8" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="18" y="22" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            /* password label + field */
+            '<rect x="18" y="28" width="10" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="18" y="30" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            /* submit */
+            '<rect x="18" y="36" width="28" height="4" rx="2" fill="#3b82f6"/>' +
+            '<rect x="27" y="37.2" width="10" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
+          '</svg>',
+
+          "auth-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            '<rect x="48" y="1.5" width="5" height="2" rx="1" fill="#ddd"/><rect x="55" y="1.5" width="6" height="2" rx="1" fill="#3b82f6"/>' +
+            '<rect x="14" y="9" width="36" height="30" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
+            '<rect x="22" y="12" width="20" height="2" rx="1" fill="#222"/>' +
+            '<rect x="25" y="15.5" width="14" height="1.5" rx=".75" fill="#aaa"/>' +
+            '<rect x="18" y="20" width="8" height="1.2" rx=".5" fill="#888"/>' +
+            /* filled email field - blue focus ring */
+            '<rect x="18" y="22" width="28" height="4" rx="1.5" fill="#fff" stroke="#3b82f6" stroke-width=".7"/>' +
+            '<rect x="20" y="23.3" width="18" height="1.5" rx=".75" fill="#333"/>' +
+            '<rect x="18" y="28" width="10" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="18" y="30" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            /* password dots */
+            '<circle cx="21" cy="32" r=".8" fill="#333"/><circle cx="23.5" cy="32" r=".8" fill="#333"/><circle cx="26" cy="32" r=".8" fill="#333"/><circle cx="28.5" cy="32" r=".8" fill="#333"/><circle cx="31" cy="32" r=".8" fill="#333"/><circle cx="33.5" cy="32" r=".8" fill="#333"/>' +
+            '<rect x="18" y="36" width="28" height="4" rx="2" fill="#3b82f6"/>' +
+            '<rect x="27" y="37.2" width="10" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
+          '</svg>',
+
+          "auth-3": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            '<rect x="48" y="1.5" width="5" height="2" rx="1" fill="#ddd"/><rect x="55" y="1.5" width="6" height="2" rx="1" fill="#3b82f6"/>' +
+            /* success state - green banner */
+            '<rect x="14" y="9" width="36" height="30" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
+            '<rect x="14" y="9" width="36" height="6" rx="3" fill="#f0fdf4"/><rect x="14" y="12" width="36" height="3" fill="#f0fdf4"/>' +
+            '<circle cx="28" cy="12" r="2" fill="#dcfce7" stroke="#16a34a" stroke-width=".6"/>' +
+            '<polyline points="27,12 28,13 29.5,11" fill="none" stroke="#16a34a" stroke-width=".7" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<rect x="31.5" y="11.2" width="12" height="1.5" rx=".75" fill="#16a34a"/>' +
+            /* redirect text */
+            '<rect x="20" y="20" width="24" height="2" rx="1" fill="#222"/>' +
+            '<rect x="22" y="24" width="20" height="1.5" rx=".75" fill="#aaa"/>' +
+            '<rect x="24" y="27" width="16" height="1.5" rx=".75" fill="#aaa"/>' +
+            /* dashboard preview */
+            '<rect x="18" y="32" width="28" height="5" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width=".5"/>' +
+            '<rect x="20" y="33.5" width="6" height="2" rx="1" fill="#dbeafe"/><rect x="28" y="33.5" width="6" height="2" rx="1" fill="#dcfce7"/><rect x="36" y="33.5" width="6" height="2" rx="1" fill="#e0e7ff"/>' +
+          '</svg>',
+
+          /* Cart — product list & summary */
+          "cart-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            /* cart badge */
+            '<rect x="53" y="1" width="5" height="3" rx="1.5" fill="none" stroke="#888" stroke-width=".5"/>' +
+            '<circle cx="57" cy="1.5" r="1.5" fill="#3b82f6"/><rect x="56" y=".8" width="2" height="1.3" rx=".5" fill="#fff"/>' +
+            /* product row 1 */
+            '<rect x="3" y="8" width="9" height="9" rx="2" fill="#f1f5f9"/>' +
+            '<rect x="14" y="8.5" width="20" height="1.8" rx=".75" fill="#222"/>' +
+            '<rect x="14" y="11.5" width="12" height="1.3" rx=".5" fill="#aaa"/>' +
+            '<rect x="14" y="14" width="8" height="1.5" rx=".75" fill="#111" opacity=".8"/>' +
+            '<rect x="49" y="10" width="12" height="3" rx="1.5" fill="#f1f5f9" stroke="#d1d5db" stroke-width=".4"/>' +
+            /* product row 2 */
+            '<rect x="3" y="19.5" width="9" height="9" rx="2" fill="#f0fdf4"/>' +
+            '<rect x="14" y="20" width="18" height="1.8" rx=".75" fill="#222"/>' +
+            '<rect x="14" y="23" width="14" height="1.3" rx=".5" fill="#aaa"/>' +
+            '<rect x="14" y="25.5" width="8" height="1.5" rx=".75" fill="#111" opacity=".8"/>' +
+            '<rect x="49" y="21.5" width="12" height="3" rx="1.5" fill="#f1f5f9" stroke="#d1d5db" stroke-width=".4"/>' +
+            /* product row 3 */
+            '<rect x="3" y="31" width="9" height="9" rx="2" fill="#fef3c7"/>' +
+            '<rect x="14" y="31.5" width="22" height="1.8" rx=".75" fill="#222"/>' +
+            '<rect x="14" y="34.5" width="10" height="1.3" rx=".5" fill="#aaa"/>' +
+            '<rect x="14" y="37" width="9" height="1.5" rx=".75" fill="#111" opacity=".8"/>' +
+            '<rect x="49" y="33" width="12" height="3" rx="1.5" fill="#f1f5f9" stroke="#d1d5db" stroke-width=".4"/>' +
+          '</svg>',
+
+          "cart-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            /* heading */
+            '<rect x="3" y="8" width="16" height="2" rx="1" fill="#222"/>' +
+            /* table header */
+            '<rect x="3" y="13" width="58" height=".5" fill="#e5e7eb"/>' +
+            '<rect x="3" y="11.5" width="10" height="1.2" rx=".5" fill="#999"/><rect x="22" y="11.5" width="6" height="1.2" rx=".5" fill="#999"/><rect x="35" y="11.5" width="6" height="1.2" rx=".5" fill="#999"/><rect x="50" y="11.5" width="10" height="1.2" rx=".5" fill="#999"/>' +
+            /* row 1 */
+            '<rect x="3" y="15" width="14" height="1.3" rx=".5" fill="#444"/><rect x="24" y="15" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="15" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="15" width="8" height="1.3" rx=".5" fill="#444"/>' +
+            '<rect x="3" y="18" width="58" height=".3" fill="#f0f0f0"/>' +
+            /* row 2 */
+            '<rect x="3" y="20" width="12" height="1.3" rx=".5" fill="#444"/><rect x="24" y="20" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="20" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="20" width="9" height="1.3" rx=".5" fill="#444"/>' +
+            '<rect x="3" y="23" width="58" height=".3" fill="#f0f0f0"/>' +
+            /* row 3 */
+            '<rect x="3" y="25" width="16" height="1.3" rx=".5" fill="#444"/><rect x="24" y="25" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="25" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="25" width="7" height="1.3" rx=".5" fill="#444"/>' +
+            '<rect x="3" y="28" width="58" height=".5" fill="#e5e7eb"/>' +
+            /* totals */
+            '<rect x="35" y="30.5" width="8" height="1.3" rx=".5" fill="#888"/><rect x="50" y="30.5" width="10" height="1.5" rx=".75" fill="#111"/>' +
+            '<rect x="35" y="33.5" width="6" height="1.3" rx=".5" fill="#888"/><rect x="50" y="33.5" width="10" height="1.5" rx=".75" fill="#111"/>' +
+            /* checkout button */
+            '<rect x="35" y="37" width="26" height="4" rx="2" fill="#111"/>' +
+            '<rect x="41" y="38.2" width="14" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
+          '</svg>',
+
+          /* Payment — checkout form */
+          "pay-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            /* steps indicator */
+            '<circle cx="22" cy="8" r="1.5" fill="#16a34a"/><rect x="24" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="32" cy="8" r="1.5" fill="#16a34a"/><rect x="34" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="42" cy="8" r="1.5" fill="#3b82f6" stroke="#3b82f6" stroke-width=".5"/>' +
+            /* card number label + field */
+            '<rect x="4" y="12" width="14" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="4" y="14" width="56" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            '<rect x="7" y="15.8" width="20" height="1.5" rx=".75" fill="#333"/>' +
+            '<rect x="51" y="15.5" width="6" height="2" rx="1" fill="#e0e7ff"/>' +
+            /* expiry + cvv */
+            '<rect x="4" y="22" width="8" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="4" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            '<rect x="7" y="25.8" width="10" height="1.5" rx=".75" fill="#333"/>' +
+            '<rect x="34" y="22" width="4" height="1.2" rx=".5" fill="#888"/>' +
+            '<rect x="34" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            '<rect x="37" y="25.8" width="8" height="1.5" rx=".75" fill="#333"/>' +
+            /* pay button */
+            '<rect x="4" y="33" width="56" height="5" rx="2.5" fill="#111"/>' +
+            '<rect x="20" y="34.5" width="24" height="1.8" rx=".75" fill="#fff" opacity=".9"/>' +
+            /* secure badge */
+            '<rect x="22" y="40" width="20" height="1.5" rx=".75" fill="#bbb"/>' +
+          '</svg>',
+
+          "pay-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#fff"/>' +
+            '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
+            '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
+            /* steps indicator */
+            '<circle cx="22" cy="8" r="1.5" fill="#16a34a"/><rect x="24" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="32" cy="8" r="1.5" fill="#16a34a"/><rect x="34" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="42" cy="8" r="1.5" fill="#ef4444"/>' +
+            /* card number - error state */
+            '<rect x="4" y="12" width="14" height="1.2" rx=".5" fill="#ef4444"/>' +
+            '<rect x="4" y="14" width="56" height="5" rx="2" fill="#fff" stroke="#fca5a5" stroke-width=".7"/>' +
+            '<rect x="7" y="15.8" width="20" height="1.5" rx=".75" fill="#333"/>' +
+            /* error message */
+            '<rect x="4" y="20.5" width="30" height="1.2" rx=".5" fill="#ef4444"/>' +
+            /* expiry + cvv */
+            '<rect x="4" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            '<rect x="34" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
+            /* disabled pay button */
+            '<rect x="4" y="33" width="56" height="5" rx="2.5" fill="#d1d5db"/>' +
+            '<rect x="20" y="34.5" width="24" height="1.8" rx=".75" fill="#fff" opacity=".5"/>' +
+            /* timeout indicator */
+            '<rect x="4" y="40.5" width="56" height="2" rx="1" fill="#fef2f2"/>' +
+            '<rect x="4" y="40.5" width="36" height="2" rx="1" fill="#fecaca"/>' +
+          '</svg>',
+
+          /* Confirmation — email template */
+          "confirm-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#f9fafb"/>' +
+            /* email card */
+            '<rect x="8" y="3" width="48" height="38" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
+            /* logo area */
+            '<circle cx="32" cy="9" r="3" fill="#f3e8ff"/>' +
+            '<rect x="30.5" y="7.5" width="3" height="2" rx=".5" fill="#a855f7" opacity=".6"/>' +
+            '<polyline points="30.5,7.5 32,9 33.5,7.5" fill="none" stroke="#a855f7" stroke-width=".5"/>' +
+            /* heading */
+            '<rect x="18" y="15" width="28" height="2" rx="1" fill="#222"/>' +
+            '<rect x="14" y="19" width="36" height="1.3" rx=".5" fill="#aaa"/>' +
+            '<rect x="18" y="21.5" width="28" height="1.3" rx=".5" fill="#aaa"/>' +
+            /* order box */
+            '<rect x="12" y="25" width="40" height="8" rx="2" fill="#faf5ff" stroke="#e9d5ff" stroke-width=".4"/>' +
+            '<rect x="15" y="27" width="12" height="1.3" rx=".5" fill="#7c3aed"/>' +
+            '<rect x="15" y="29.5" width="20" height="1" rx=".5" fill="#aaa"/>' +
+            '<rect x="42" y="27.5" width="7" height="2" rx="1" fill="#7c3aed" opacity=".15"/><rect x="43" y="28" width="5" height="1" rx=".5" fill="#7c3aed"/>' +
+            /* footer link */
+            '<rect x="20" y="35.5" width="24" height="1.3" rx=".5" fill="#bbb"/>' +
+            '<rect x="24" y="38" width="16" height="1" rx=".5" fill="#ddd"/>' +
+          '</svg>',
+
+          "confirm-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="64" height="44" fill="#f9fafb"/>' +
+            /* email card */
+            '<rect x="8" y="3" width="48" height="38" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
+            /* green success header */
+            '<rect x="8" y="3" width="48" height="10" rx="3" fill="#f0fdf4"/><rect x="8" y="10" width="48" height="3" fill="#f0fdf4"/>' +
+            '<circle cx="32" cy="8" r="3.5" fill="#dcfce7" stroke="#16a34a" stroke-width=".6"/>' +
+            '<polyline points="30,8 31.5,9.5 34.5,6.5" fill="none" stroke="#16a34a" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>' +
+            /* confirmed text */
+            '<rect x="19" y="16" width="26" height="2" rx="1" fill="#16a34a"/>' +
+            '<rect x="14" y="20" width="36" height="1.3" rx=".5" fill="#aaa"/>' +
+            '<rect x="18" y="22.5" width="28" height="1.3" rx=".5" fill="#aaa"/>' +
+            /* order details */
+            '<rect x="12" y="26" width="40" height="10" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width=".4"/>' +
+            '<rect x="15" y="28" width="8" height="1" rx=".5" fill="#999"/><rect x="36" y="28" width="13" height="1" rx=".5" fill="#333"/>' +
+            '<rect x="15" y="30.5" width="10" height="1" rx=".5" fill="#999"/><rect x="36" y="30.5" width="9" height="1" rx=".5" fill="#333"/>' +
+            '<rect x="15" y="33" width="6" height="1" rx=".5" fill="#999"/><rect x="36" y="33" width="11" height="1" rx=".5" fill="#16a34a"/>' +
+            /* footer */
+            '<rect x="22" y="38" width="20" height="1.3" rx=".5" fill="#bbb"/>' +
+          '</svg>',
         };
 
         /* ── UTILITIES ── */
 
         function esc(v) {
           return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-        }
-
-        function getShellPadding() {
-          var w = window.innerWidth || document.documentElement.clientWidth || 0;
-          if (w <= 767) return SHELL_PADDING_MOBILE;
-          if (w <= 991) return SHELL_PADDING_TABLET;
-          return SHELL_PADDING_DESKTOP;
         }
 
         function clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
@@ -873,8 +1110,8 @@ textarea {
         /* ━━━━━ SHELL BUILD ━━━━━ */
 
         function buildShell() {
-          var prCards = PULL_REQUESTS.map(function (pr) {
-            return '<article class="ito-pr-card"><div class="ito-pr-icon">\u2387</div><div class="ito-pr-body">' +
+          var prCards = PULL_REQUESTS.map(function (pr, idx) {
+            return '<article class="ito-pr-card ito-fadeable" data-pr-card="' + idx + '"><div class="ito-pr-icon">\u2387</div><div class="ito-pr-body">' +
               '<div class="ito-pr-title">' + esc(pr.title) + "</div>" +
               '<div class="ito-pr-branch">' + esc(pr.branch) + "</div>" +
               '<div class="ito-pr-meta"><span>#' + esc(pr.id.replace("pr-","")) + "</span><span>" + pr.filesChanged + " files</span></div>" +
@@ -883,7 +1120,7 @@ textarea {
           }).join("");
 
           var timelineSteps = STEPS.map(function (s, i) {
-            return '<article class="ito-step is-future" data-step-index="' + i + '">' +
+            return '<article class="ito-step is-future ito-fadeable" data-step-index="' + i + '">' +
               '<div class="ito-step-card is-dim" data-card="' + i + '">' +
                 '<div class="ito-step-top"><div class="ito-step-title-wrap"><span data-icon="' + i + '"></span><span class="ito-step-title">' + esc(s.label) + '</span></div><div class="ito-step-status" data-status="' + i + '"></div></div>' +
                 '<div class="ito-step-sub' + (s.status==="fail"?" is-error":"") + '">' + esc(s.actionDetail) + '</div>' +
@@ -899,20 +1136,20 @@ textarea {
             '<div class="ito-hero-topbar"><span class="ito-kicker">Automated QA</span><div class="ito-live"><span class="ito-live-dot"></span><span>Live</span></div></div>' +
             '<div class="ito-hero-grid">' +
               '<aside class="ito-col ito-col-left"><div class="ito-col-head">Pull Requests</div><div class="ito-pr-list">' + prCards +
-                '<article class="ito-pr-skeleton"><div class="ito-pr-skeleton-dot"></div><div class="ito-pr-skeleton-lines"><span></span><span></span></div></article>' +
-              '</div><div class="ito-run-meta"><span class="ito-run-spinner"></span><span>ito-agent \u00b7 run #88241</span></div></aside>' +
+                '<article class="ito-pr-skeleton ito-fadeable" data-pr-skeleton><div class="ito-pr-skeleton-dot"></div><div class="ito-pr-skeleton-lines"><span></span><span></span></div></article>' +
+              '</div><div class="ito-run-meta ito-fadeable" data-pr-meta><span class="ito-run-spinner"></span><span>ito-agent \u00b7 run #88241</span></div></aside>' +
               '<main class="ito-col ito-col-center"><div class="ito-center-main">' +
-                '<div class="ito-col-head ito-col-head-split"><span>Agent Timeline</span><div class="ito-head-progress"><span data-step-counter>step 1/' + STEPS.length + '</span><div class="ito-progress ito-progress-short"><span data-step-progress style="width:0%"></span></div></div></div>' +
+                '<div class="ito-col-head ito-col-head-split"><span>Agent Timeline</span><div class="ito-head-progress ito-fadeable" data-tl-progress><span data-step-counter>step 1/' + STEPS.length + '</span><div class="ito-progress ito-progress-short"><span data-step-progress style="width:0%"></span></div></div></div>' +
                 '<div class="ito-timeline-viewport" data-timeline-viewport><div class="ito-timeline-track" data-timeline-track>' + timelineSteps + '</div></div>' +
-                '<div class="ito-statusbar"><div class="ito-status-left"><span class="ito-run-spinner"></span><span data-status-label>Initialising\u2026</span></div><span>ito-agent</span></div>' +
+                '<div class="ito-statusbar ito-fadeable" data-tl-status><div class="ito-status-left"><span class="ito-run-spinner"></span><span data-status-label>Initialising\u2026</span></div><span>ito-agent</span></div>' +
               '</div></main>' +
               '<aside class="ito-col ito-col-right"><div class="ito-col-head">QA Report</div>' +
-                '<div class="ito-report-summary"><div class="ito-report-summary-top"><span>Coverage</span><strong data-coverage>0%</strong></div><div class="ito-progress"><span data-coverage-bar style="width:0%"></span></div><div class="ito-report-summary-bottom"><span>#run-88241</span><span data-elapsed>\u2014</span></div></div>' +
-                '<div class="ito-report-list">' + reportRows + '</div>' +
-                '<div class="ito-report-footer"><div class="ito-metrics"><div><p>Total</p><strong data-metric-total>0</strong></div><div class="is-bordered"><p>Passed</p><strong class="is-pass" data-metric-pass>0</strong></div><div><p>Failed</p><strong class="is-fail" data-metric-fail>0</strong></div></div><button class="ito-rerun-btn" type="button">Re-run suite</button></div>' +
+                '<div class="ito-report-summary ito-fadeable" data-qa-summary><div class="ito-report-summary-top"><span>Coverage</span><strong data-coverage>0%</strong></div><div class="ito-progress"><span data-coverage-bar style="width:0%"></span></div><div class="ito-report-summary-bottom"><span>#run-88241</span><span data-elapsed>\u2014</span></div></div>' +
+                '<div class="ito-report-list ito-fadeable" data-qa-list>' + reportRows + '</div>' +
+                '<div class="ito-report-footer ito-fadeable" data-qa-footer><div class="ito-metrics"><div><p>Total</p><strong data-metric-total>0</strong></div><div class="is-bordered"><p>Passed</p><strong class="is-pass" data-metric-pass>0</strong></div><div><p>Failed</p><strong class="is-fail" data-metric-fail>0</strong></div></div><button class="ito-rerun-btn" type="button">Re-run suite</button></div>' +
               '</aside>' +
             '</div>' +
-            '<div class="ito-hero-bottombar"><span>ito \u00b7 qa engine</span><div class="ito-bottom-right"><span>2 PRs \u00b7 4 tests \u00b7 1 failure</span><span class="ito-connected"><i></i>Connected</span></div></div>' +
+            '<div class="ito-hero-bottombar"><span>ito \u00b7 qa engine</span><div class="ito-bottom-right"><span data-bottom-stats>2 PRs \u00b7 0 tests \u00b7 0 failures</span><span class="ito-connected"><i></i>Connected</span></div></div>' +
           '</div></div></div></section>';
         }
 
@@ -922,12 +1159,13 @@ textarea {
         */
 
         function updateState(root, activeIndex) {
+          var isIdle = activeIndex < 0;
           var isComplete = activeIndex >= STEPS.length;
           var safeIndex = clamp(activeIndex, 0, STEPS.length);
-          var progress = clamp(Math.round((safeIndex / STEPS.length) * 100), 0, 100);
+          var progress = isIdle ? 0 : clamp(Math.round((safeIndex / STEPS.length) * 100), 0, 100);
 
           var counter = root.querySelector("[data-step-counter]");
-          if (counter) counter.textContent = "step " + (isComplete ? STEPS.length : clamp(safeIndex, 1, STEPS.length)) + "/" + STEPS.length;
+          if (counter) counter.textContent = "step " + (isComplete ? STEPS.length : isIdle ? 0 : clamp(safeIndex, 1, STEPS.length)) + "/" + STEPS.length;
 
           var progBar = root.querySelector("[data-step-progress]");
           if (progBar) progBar.style.width = progress + "%";
@@ -936,7 +1174,7 @@ textarea {
           if (label) {
             label.textContent = isComplete
               ? "Run complete"
-              : safeIndex === 0
+              : isIdle || safeIndex === 0
                 ? "Initialising\u2026"
                 : "Executing: " + STEPS[Math.min(safeIndex - 1, STEPS.length - 1)].label;
           }
@@ -946,15 +1184,22 @@ textarea {
           var covBar = root.querySelector("[data-coverage-bar]");
           if (covBar) covBar.style.width = progress + "%";
           var elapsed = root.querySelector("[data-elapsed]");
-          if (elapsed) elapsed.textContent = safeIndex > 0 ? (safeIndex * 2) + "s" : "\u2014";
+          if (elapsed) elapsed.textContent = safeIndex > 0 && !isIdle ? (safeIndex * 2) + "s" : "\u2014";
 
           for (var i = 0; i < STEPS.length; i++) {
             var step = STEPS[i];
-            var isDone = safeIndex > i;
-            var isRunning = !isComplete && safeIndex === i;
-            var isFuture = safeIndex < i;
+            var isDone = !isIdle && safeIndex > i;
+            var isRunning = !isIdle && !isComplete && safeIndex === i;
+            var isFuture = isIdle || safeIndex < i;
             var stateStr = isRunning ? "running" : isDone ? "done" : "idle";
             var isLast = i === STEPS.length - 1;
+
+            if (isIdle) {
+              isDone = false;
+              isRunning = false;
+              isFuture = true;
+              stateStr = "idle";
+            }
 
             /* In "complete" state, all are done, none are running */
             if (isComplete) {
@@ -966,7 +1211,11 @@ textarea {
 
             var wrapper = root.querySelector('[data-step-index="' + i + '"]');
             if (wrapper) {
+              var hasFade = wrapper.classList.contains("ito-fadeable");
+              var hasVis = wrapper.classList.contains("is-visible");
               wrapper.className = "ito-step" +
+                (hasFade ? " ito-fadeable" : "") +
+                (hasVis ? " is-visible" : "") +
                 (isDone ? " is-complete" : "") +
                 (isRunning ? " is-active" : "") +
                 (isFuture ? " is-future" : "");
@@ -1003,9 +1252,18 @@ textarea {
             if (expandSlot) {
               var showExpand = !isComplete && (isDone || isRunning);
               if (showExpand && !expandSlot.hasChildNodes()) {
-                expandSlot.innerHTML = '<div class="ito-step-expand">' +
+                expandSlot.innerHTML = '<div class="ito-step-expand is-opening">' +
                   shotsHtml(step.shots, isDone, step.status === "fail") +
                   '<pre class="ito-code"><code>' + esc(step.codeSnippet) + "</code></pre></div>";
+                /* Remove is-opening on next frame to trigger open transition */
+                var expPanel = expandSlot.querySelector(".ito-step-expand");
+                if (expPanel) {
+                  requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                      expPanel.classList.remove("is-opening");
+                    });
+                  });
+                }
               } else if (!showExpand && expandSlot.hasChildNodes()) {
                 expandSlot.innerHTML = "";
               }
@@ -1062,6 +1320,12 @@ textarea {
           if (mTotal) mTotal.textContent = doneCount;
           if (mPass) mPass.textContent = passCount;
           if (mFail) mFail.textContent = failCount;
+
+          /* bottom bar stats */
+          var bStats = root.querySelector("[data-bottom-stats]");
+          if (bStats) {
+            bStats.textContent = "2 PRs \u00b7 " + doneCount + " test" + (doneCount !== 1 ? "s" : "") + " \u00b7 " + failCount + " failure" + (failCount !== 1 ? "s" : "");
+          }
         }
 
         /* ━━━━━ HELPERS ━━━━━ */
@@ -1094,9 +1358,24 @@ textarea {
           }
 
           var vh = viewport.clientHeight;
-          var target = Math.max(0, active.offsetTop - vh * 0.22);
+          var cardTop = active.offsetTop;
+          var cardHeight = active.offsetHeight;
           var maxY = Math.max(0, track.scrollHeight - vh);
-          track.style.transform = "translateY(-" + Math.min(target, maxY) + "px)";
+
+          /* Try to fit the entire card in view with some top padding */
+          var topPad = vh * 0.08;
+          var target;
+
+          if (cardHeight + topPad <= vh) {
+            /* Card fits — position with small pad above */
+            target = cardTop - topPad;
+          } else {
+            /* Card is taller than viewport — show from top */
+            target = cardTop - topPad;
+          }
+
+          target = Math.max(0, Math.min(target, maxY));
+          track.style.transform = "translateY(-" + target + "px)";
         }
 
         function preventScroll(root) {
@@ -1119,23 +1398,24 @@ textarea {
           if (root._itoRO) root._itoRO.disconnect();
         }
 
-        /* Animation state machine:
-           intro: fade in columns left → center → right with stagger
-           stepIndex 0 → STEPS.length-1: each step running
-           stepIndex STEPS.length: "complete" state (all collapsed, scroll to top)
-           outro: fade all 3 columns out simultaneously, then restart
+        /* ━━━━━ ANIMATION LIFECYCLE ━━━━━
+           Phase 1: Titles visible, content hidden
+           Phase 2: PR cards fade in one by one
+           Phase 3: Timeline cards fade in one by one
+           Phase 4: QA Report items fade in one by one
+           Phase 5: Dim PR+QA to 50%, run timeline sequence
+           End: Complete → un-dim → fade out all → restart
         */
 
-        var INTRO_STAGGER = 150;  /* ms between each column fade-in */
-        var INTRO_LEAD = 300;     /* ms before first column appears */
-        var FADE_OUT_DURATION = 450; /* matches CSS transition on .ito-col */
+        var CARD_STAGGER = 240;   /* ms between each card fade-in */
+        var PHASE_GAP = 300;      /* ms between phases */
 
         function startAnimation(root) {
-          var stepIndex = 0;
+          var stepIndex = -1;
           var intervalId = null;
           var completeTimeoutId = null;
           var restartTimeoutId = null;
-          var introTimeouts = [];
+          var phaseTimeouts = [];
           var restarting = false;
 
           var colLeft = null;
@@ -1147,7 +1427,7 @@ textarea {
           colCenter = root.querySelector(".ito-col-center");
           colRight = root.querySelector(".ito-col-right");
 
-          updateState(root, 0);
+          updateState(root, -1);
           updateScale(root);
           updateTimelinePosition(root, false);
 
@@ -1159,35 +1439,104 @@ textarea {
             });
           }
 
-          function clearIntroTimeouts() {
-            for (var i = 0; i < introTimeouts.length; i++) clearTimeout(introTimeouts[i]);
-            introTimeouts = [];
+          function clearPhaseTimeouts() {
+            for (var i = 0; i < phaseTimeouts.length; i++) clearTimeout(phaseTimeouts[i]);
+            phaseTimeouts = [];
           }
 
-          function showColumns(callback) {
-            /* Stagger: left, then center, then right */
-            introTimeouts.push(setTimeout(function () {
-              if (colLeft) colLeft.classList.add("is-visible");
-            }, INTRO_LEAD));
+          /* Stagger-reveal a list of elements, return total duration */
+          function staggerShow(elements, delay) {
+            for (var i = 0; i < elements.length; i++) {
+              (function (el, d) {
+                phaseTimeouts.push(setTimeout(function () {
+                  el.classList.add("is-visible");
+                }, d));
+              })(elements[i], delay + i * CARD_STAGGER);
+            }
+            return delay + elements.length * CARD_STAGGER;
+          }
 
-            introTimeouts.push(setTimeout(function () {
-              if (colCenter) colCenter.classList.add("is-visible");
-            }, INTRO_LEAD + INTRO_STAGGER));
+          /* Hide all .ito-fadeable elements */
+          function hideAll() {
+            var all = root.querySelectorAll(".ito-fadeable");
+            for (var i = 0; i < all.length; i++) all[i].classList.remove("is-visible");
+          }
 
-            introTimeouts.push(setTimeout(function () {
-              if (colRight) colRight.classList.add("is-visible");
-              /* Start stepping after all columns are visible */
+          function dimSides() {
+            if (colLeft) colLeft.classList.add("is-dimmed");
+            if (colRight) colRight.classList.add("is-dimmed");
+            if (colCenter) colCenter.classList.remove("is-dimmed");
+          }
+
+          function focusQA() {
+            if (colLeft) colLeft.classList.add("is-dimmed");
+            if (colCenter) colCenter.classList.add("is-dimmed");
+            if (colRight) colRight.classList.remove("is-dimmed");
+          }
+
+          function undimAll() {
+            if (colLeft) colLeft.classList.remove("is-dimmed");
+            if (colCenter) colCenter.classList.remove("is-dimmed");
+            if (colRight) colRight.classList.remove("is-dimmed");
+          }
+
+          function runIntro(callback) {
+            var t = INTRO_LEAD;
+
+            /* Phase 2: PR cards one by one */
+            var prItems = root.querySelectorAll("[data-pr-card]");
+            var prSkeleton = root.querySelector("[data-pr-skeleton]");
+            var prMeta = root.querySelector("[data-pr-meta]");
+            var prAll = [];
+            for (var i = 0; i < prItems.length; i++) prAll.push(prItems[i]);
+            if (prSkeleton) prAll.push(prSkeleton);
+            if (prMeta) prAll.push(prMeta);
+            t = staggerShow(prAll, t);
+            t += PHASE_GAP;
+
+            /* Phase 3: Timeline cards one by one */
+            var tlCards = root.querySelectorAll("[data-step-index]");
+            var tlProgress = root.querySelector("[data-tl-progress]");
+            var tlStatus = root.querySelector("[data-tl-status]");
+            var tlAll = [];
+            for (var j = 0; j < tlCards.length; j++) tlAll.push(tlCards[j]);
+            if (tlProgress) tlAll.push(tlProgress);
+            if (tlStatus) tlAll.push(tlStatus);
+            t = staggerShow(tlAll, t);
+            t += PHASE_GAP;
+
+            /* Phase 4: QA Report items one by one */
+            var qaSummary = root.querySelector("[data-qa-summary]");
+            var qaList = root.querySelector("[data-qa-list]");
+            var qaFooter = root.querySelector("[data-qa-footer]");
+            var qaAll = [];
+            if (qaSummary) qaAll.push(qaSummary);
+            if (qaList) qaAll.push(qaList);
+            if (qaFooter) qaAll.push(qaFooter);
+            t = staggerShow(qaAll, t);
+
+            /* Wait for last QA item's transition to finish, then fire callback */
+            var FADE_TRANSITION = 675; /* match .ito-fadeable transition duration */
+            phaseTimeouts.push(setTimeout(function () {
               if (callback) callback();
-            }, INTRO_LEAD + INTRO_STAGGER * 2));
+            }, t + FADE_TRANSITION));
           }
 
-          function hideColumns(callback) {
-            /* Fade all 3 out simultaneously */
-            if (colLeft) colLeft.classList.remove("is-visible");
-            if (colCenter) colCenter.classList.remove("is-visible");
-            if (colRight) colRight.classList.remove("is-visible");
-            /* Wait for the CSS transition to finish before callback */
-            restartTimeoutId = setTimeout(callback, FADE_OUT_DURATION);
+          function beginRun() {
+            /* Dim sides and open first card at the same moment */
+            dimSides();
+            stepIndex = 0;
+            updateState(root, 0);
+            scheduleScroll(false);
+            /* Re-scroll as first expand panel grows */
+            phaseTimeouts.push(setTimeout(function () {
+              updateTimelinePosition(root, false);
+            }, 450));
+            phaseTimeouts.push(setTimeout(function () {
+              updateTimelinePosition(root, false);
+            }, 850));
+            /* Subsequent ticks on interval */
+            startLoop();
           }
 
           function tick() {
@@ -1196,18 +1545,114 @@ textarea {
             if (stepIndex <= STEPS.length - 1) {
               updateState(root, stepIndex);
               scheduleScroll(false);
+              /* Re-scroll as expand panel grows open */
+              phaseTimeouts.push(setTimeout(function () {
+                updateTimelinePosition(root, false);
+              }, 450));
+              phaseTimeouts.push(setTimeout(function () {
+                updateTimelinePosition(root, false);
+              }, 850));
             } else if (stepIndex === STEPS.length) {
-              /* Last step finished → collapse cards, scroll naturally to top */
               clearInterval(intervalId);
-              updateState(root, STEPS.length);
-              scheduleScroll(true);
 
-              /* Show collapsed state, then fade out, then restart */
-              completeTimeoutId = setTimeout(function () {
-                hideColumns(function () {
-                  doRestart();
-                });
-              }, COMPLETE_PAUSE);
+              /* Update all cards to "done" state (icons, status text) 
+                 but don't remove expand panels yet */
+              for (var k = 0; k < STEPS.length; k++) {
+                var st = STEPS[k];
+                var iconSlot = root.querySelector('[data-icon="' + k + '"]');
+                if (iconSlot) {
+                  var ni = stepIconHtml(st.actionType, "done");
+                  if (iconSlot.outerHTML !== ni) iconSlot.outerHTML = ni.replace(">", ' data-icon="' + k + '">');
+                }
+                var statusSlot = root.querySelector('[data-status="' + k + '"]');
+                if (statusSlot) {
+                  statusSlot.innerHTML = "<span>" + esc(st.duration) + '</span> <span class="' + (st.status==="pass"?"is-pass":"is-fail") + '">' + esc(st.status) + "</span>";
+                }
+                var card = root.querySelector('[data-card="' + k + '"]');
+                if (card) {
+                  card.className = "ito-step-card" + (st.status === "fail" ? " is-fail" : "");
+                }
+                /* Update report rows to done */
+                var reportRow = root.querySelector('[data-report="' + k + '"]');
+                if (reportRow) reportRow.className = "ito-report-row";
+                var ricon = root.querySelector('[data-ricon="' + k + '"]');
+                if (ricon) {
+                  ricon.className = "ito-mini " + (st.status === "pass" ? "pass" : "fail");
+                  ricon.textContent = st.status === "pass" ? "\u2713" : "\u2715";
+                }
+                var rright = root.querySelector('[data-rright="' + k + '"]');
+                if (rright) {
+                  rright.innerHTML = "<span>" + esc(st.duration) + '</span> <span class="' + (st.status==="pass"?"is-pass":"is-fail") + '">' + esc(st.status) + "</span>";
+                }
+              }
+              /* Update header + metrics to final state */
+              var lbl = root.querySelector("[data-status-label]");
+              if (lbl) lbl.textContent = "Run complete";
+              var cnt = root.querySelector("[data-step-counter]");
+              if (cnt) cnt.textContent = "step " + STEPS.length + "/" + STEPS.length;
+              var prg = root.querySelector("[data-step-progress]");
+              if (prg) prg.style.width = "100%";
+              var cov = root.querySelector("[data-coverage]");
+              if (cov) cov.textContent = "100%";
+              var covBar = root.querySelector("[data-coverage-bar]");
+              if (covBar) covBar.style.width = "100%";
+              var el = root.querySelector("[data-elapsed]");
+              if (el) el.textContent = (STEPS.length * 2) + "s";
+              var pc = STEPS.filter(function(s){return s.status==="pass"}).length;
+              var fc = STEPS.filter(function(s){return s.status==="fail"}).length;
+              var mT = root.querySelector("[data-metric-total]");
+              var mP = root.querySelector("[data-metric-pass]");
+              var mF = root.querySelector("[data-metric-fail]");
+              if (mT) mT.textContent = STEPS.length;
+              if (mP) mP.textContent = pc;
+              if (mF) mF.textContent = fc;
+              var bS = root.querySelector("[data-bottom-stats]");
+              if (bS) bS.textContent = "2 PRs \u00b7 " + STEPS.length + " tests \u00b7 " + fc + " failure" + (fc !== 1 ? "s" : "");
+
+              /* Close panels in reverse order (last-run card first)
+                 with overlapping stagger for a wave-like cascade */
+              var CLOSE_STAGGER = 100;
+              var expands = [];
+              var rawExpands = root.querySelectorAll(".ito-step-expand");
+              for (var m = 0; m < rawExpands.length; m++) expands.push(rawExpands[m]);
+              expands.reverse();
+
+              for (var n = 0; n < expands.length; n++) {
+                (function(el, d) {
+                  phaseTimeouts.push(setTimeout(function () {
+                    el.classList.add("is-closing");
+                  }, d));
+                })(expands[n], n * CLOSE_STAGGER);
+              }
+
+              /* Smooth scroll back to top as cards collapse
+                 (use a longer duration so it tracks with the folding) */
+              var track = root.querySelector("[data-timeline-track]");
+              if (track) {
+                track.style.transition = "transform 1000ms cubic-bezier(0.32, 0.72, 0, 1)";
+                track.style.transform = "translateY(0)";
+              }
+
+              /* After all panels have finished closing, shift focus to QA */
+              var CLOSE_TOTAL = (expands.length - 1) * CLOSE_STAGGER + 800;
+              phaseTimeouts.push(setTimeout(function () {
+                focusQA();
+                /* Restore default track transition */
+                if (track) track.style.transition = "";
+              }, CLOSE_TOTAL));
+
+              /* After focus pause, finalize and restart */
+              phaseTimeouts.push(setTimeout(function () {
+                updateState(root, STEPS.length);
+
+                completeTimeoutId = setTimeout(function () {
+                  hideAll();
+                  undimAll();
+                  restartTimeoutId = setTimeout(function () {
+                    doRestart();
+                  }, FADE_OUT_DURATION);
+                }, COMPLETE_PAUSE);
+              }, CLOSE_TOTAL + 200));
             }
           }
 
@@ -1217,13 +1662,14 @@ textarea {
           }
 
           function doRestart() {
-            stepIndex = 0;
-            updateState(root, 0);
+            stepIndex = -1;
+            updateState(root, -1);
             scheduleScroll(false);
+            undimAll();
 
-            showColumns(function () {
+            runIntro(function () {
               restarting = false;
-              startLoop();
+              beginRun();
             });
           }
 
@@ -1233,28 +1679,29 @@ textarea {
             clearInterval(intervalId);
             clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
-            clearIntroTimeouts();
+            clearPhaseTimeouts();
 
-            /* If triggered by button, fade out then restart */
-            hideColumns(function () {
+            hideAll();
+            undimAll();
+            restartTimeoutId = setTimeout(function () {
               doRestart();
-            });
+            }, FADE_OUT_DURATION);
           }
 
           root.addEventListener("click", function (e) {
             if (e.target.closest(".ito-rerun-btn")) restart();
           });
 
-          /* Initial intro sequence */
-          showColumns(function () {
-            startLoop();
+          /* Initial run */
+          runIntro(function () {
+            beginRun();
           });
 
           root._itoClean = function () {
             clearInterval(intervalId);
             clearTimeout(completeTimeoutId);
             clearTimeout(restartTimeoutId);
-            clearIntroTimeouts();
+            clearPhaseTimeouts();
           };
         }
 
