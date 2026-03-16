@@ -41,8 +41,8 @@
   --radius-sm: 12px;
   --radius-xs: 10px;
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-morph: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);        /* enters — steep start, gentle settle */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);    /* on-screen morphs — dramatic accel/decel */
   --ease-settle: cubic-bezier(0.33, 1, 0.68, 1);
 
   --duration-fast: 270ms;
@@ -186,7 +186,7 @@ textarea {
   min-height: 0;
   padding: 18px;
   overflow: hidden;
-  transition: opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 1200ms var(--ease-in-out);
 }
 
 /* Dim side columns during active timeline run */
@@ -198,14 +198,17 @@ textarea {
 .ito-fadeable {
   opacity: 0;
   transform: translateY(8px);
+  filter: blur(2px);
   transition:
-    opacity 675ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 675ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 675ms var(--ease-out),
+    transform 675ms var(--ease-out),
+    filter 400ms var(--ease-out);
 }
 
 .ito-fadeable.is-visible {
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0px);
 }
 
 .ito-col-center {
@@ -410,11 +413,12 @@ textarea {
   border-radius: var(--radius-lg);
   padding: 14px;
   background: var(--surface);
+  /* on-screen morph: dim → active → done — use ease-in-out */
   transition:
-    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 600ms var(--ease-in-out),
+    transform 600ms var(--ease-in-out),
+    border-color 600ms var(--ease-in-out),
+    background-color 600ms var(--ease-in-out);
   will-change: transform, opacity;
   transform: translateY(0);
 }
@@ -469,8 +473,8 @@ textarea {
   font-size: 11px;
   flex: 0 0 auto;
   transition:
-    background-color var(--duration-fast) var(--ease-morph),
-    color var(--duration-fast) var(--ease-morph);
+    background-color var(--duration-fast) var(--ease-in-out),
+    color var(--duration-fast) var(--ease-in-out);
 }
 
 .ito-step-icon.is-pass, .ito-mini.pass {
@@ -527,13 +531,16 @@ textarea {
   opacity: 1;
   max-height: 400px;
   overflow: hidden;
-  /* Opening transition: ease-out for natural reveal */
+  filter: blur(0px);
+  will-change: opacity, max-height, filter;
+  /* Opening: ease-out — content entering the screen */
   transition:
-    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 800ms cubic-bezier(0.22, 1, 0.36, 1),
-    margin-top 800ms cubic-bezier(0.22, 1, 0.36, 1),
-    padding-top 800ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 600ms var(--ease-out),
+    max-height 800ms var(--ease-out),
+    margin-top 800ms var(--ease-out),
+    padding-top 800ms var(--ease-out),
+    border-color 600ms var(--ease-out),
+    filter 500ms var(--ease-out);
 }
 
 /* Opening: start collapsed, then transition to open */
@@ -543,6 +550,7 @@ textarea {
   margin-top: 0;
   padding-top: 0;
   border-color: transparent;
+  filter: blur(4px);
 }
 
 .ito-step-expand.is-closing {
@@ -551,25 +559,27 @@ textarea {
   margin-top: 0;
   padding-top: 0;
   border-color: transparent;
-  /* Closing transition: different rhythm — opacity leads, height follows */
+  filter: blur(4px);
+  /* Closing: opacity leads with ease, height follows with settle */
   transition:
-    opacity 500ms cubic-bezier(0.32, 0, 0.67, 0),
-    max-height 750ms cubic-bezier(0.32, 0.72, 0, 1),
-    margin-top 750ms cubic-bezier(0.32, 0.72, 0, 1),
-    padding-top 750ms cubic-bezier(0.32, 0.72, 0, 1),
-    border-color 500ms cubic-bezier(0.32, 0, 0.67, 0);
+    opacity 500ms ease,
+    max-height 750ms var(--ease-settle),
+    margin-top 750ms var(--ease-settle),
+    padding-top 750ms var(--ease-settle),
+    border-color 500ms ease,
+    filter 400ms ease;
 }
 
 .ito-step-expand .ito-shot-row {
   opacity: 0;
   transform: translateY(6px);
-  animation: ito-fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+  animation: ito-fade-up 600ms var(--ease-out) 280ms both;
 }
 
 .ito-step-expand .ito-code {
   opacity: 0;
   transform: translateY(6px);
-  animation: ito-fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) 480ms both;
+  animation: ito-fade-up 600ms var(--ease-out) 450ms both;
 }
 
 /* ━━━━━ MINI SCREENSHOTS ━━━━━ */
@@ -590,8 +600,8 @@ textarea {
   background: #ffffff;
   flex: 0 0 auto;
   transition:
-    transform var(--duration-base) var(--ease-morph),
-    opacity var(--duration-base) var(--ease-morph);
+    transform var(--duration-base) var(--ease-in-out),
+    opacity var(--duration-base) var(--ease-in-out);
 }
 
 .ito-step.is-active .ito-shot {
@@ -685,9 +695,9 @@ textarea {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-soft);
   transition:
-    opacity var(--duration-base) var(--ease-morph),
-    background-color var(--duration-base) var(--ease-morph),
-    transform var(--duration-base) var(--ease-morph);
+    opacity var(--duration-base) var(--ease-in-out),
+    background-color var(--duration-base) var(--ease-in-out),
+    transform var(--duration-base) var(--ease-in-out);
 }
 
 .ito-report-row:last-child { border-bottom: 0; }
@@ -1246,28 +1256,7 @@ textarea {
               }
             }
 
-            /* Expand: show when running or done-but-not-complete.
-               In complete state, collapse everything. */
-            var expandSlot = root.querySelector('[data-expand="' + i + '"]');
-            if (expandSlot) {
-              var showExpand = !isComplete && (isDone || isRunning);
-              if (showExpand && !expandSlot.hasChildNodes()) {
-                expandSlot.innerHTML = '<div class="ito-step-expand is-opening">' +
-                  shotsHtml(step.shots, isDone, step.status === "fail") +
-                  '<pre class="ito-code"><code>' + esc(step.codeSnippet) + "</code></pre></div>";
-                /* Remove is-opening on next frame to trigger open transition */
-                var expPanel = expandSlot.querySelector(".ito-step-expand");
-                if (expPanel) {
-                  requestAnimationFrame(function () {
-                    requestAnimationFrame(function () {
-                      expPanel.classList.remove("is-opening");
-                    });
-                  });
-                }
-              } else if (!showExpand && expandSlot.hasChildNodes()) {
-                expandSlot.innerHTML = "";
-              }
-            }
+            /* Expand panels are managed externally by transitionExpand() */
 
             /* Report */
             var reportRow = root.querySelector('[data-report="' + i + '"]');
@@ -1407,7 +1396,7 @@ textarea {
            End: Complete → un-dim → fade out all → restart
         */
 
-        var CARD_STAGGER = 240;   /* ms between each card fade-in */
+        var CARD_STAGGER = 200;   /* initial ms between cards, decreases progressively */
         var PHASE_GAP = 300;      /* ms between phases */
 
         function startAnimation(root) {
@@ -1444,16 +1433,20 @@ textarea {
             phaseTimeouts = [];
           }
 
-          /* Stagger-reveal a list of elements, return total duration */
+          /* Progressive stagger: each gap is slightly shorter than the last
+             creating a wave that accelerates — per the orchestration principle */
           function staggerShow(elements, delay) {
+            var t = delay;
             for (var i = 0; i < elements.length; i++) {
               (function (el, d) {
                 phaseTimeouts.push(setTimeout(function () {
                   el.classList.add("is-visible");
                 }, d));
-              })(elements[i], delay + i * CARD_STAGGER);
+              })(elements[i], t);
+              /* Each subsequent gap is 85% of the previous — the wave picks up speed */
+              t += Math.round(CARD_STAGGER * Math.pow(0.85, i));
             }
-            return delay + elements.length * CARD_STAGGER;
+            return t;
           }
 
           /* Hide all .ito-fadeable elements */
@@ -1522,30 +1515,71 @@ textarea {
             }, t + FADE_TRANSITION));
           }
 
+          /* ── Expand handoff: close prev card, open new card simultaneously ── */
+          var EXPAND_CLOSE_MS = 800; /* time to wait before removing closed panel DOM */
+
+          function openExpand(idx) {
+            if (idx < 0 || idx >= STEPS.length) return;
+            var step = STEPS[idx];
+            var slot = root.querySelector('[data-expand="' + idx + '"]');
+            if (!slot || slot.hasChildNodes()) return;
+            slot.innerHTML = '<div class="ito-step-expand is-opening">' +
+              shotsHtml(step.shots, false, step.status === "fail") +
+              '<pre class="ito-code"><code>' + esc(step.codeSnippet) + "</code></pre></div>";
+            var panel = slot.querySelector(".ito-step-expand");
+            if (panel) {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                  panel.classList.remove("is-opening");
+                });
+              });
+            }
+          }
+
+          function closeExpand(idx, callback) {
+            if (idx < 0 || idx >= STEPS.length) { if (callback) callback(); return; }
+            var slot = root.querySelector('[data-expand="' + idx + '"]');
+            var panel = slot && slot.querySelector(".ito-step-expand");
+            if (!panel) { if (callback) callback(); return; }
+            panel.classList.add("is-closing");
+            phaseTimeouts.push(setTimeout(function () {
+              if (slot) slot.innerHTML = "";
+              if (callback) callback();
+            }, EXPAND_CLOSE_MS));
+          }
+
+          function transitionExpand(prevIdx, newIdx) {
+            /* Close previous and open next simultaneously */
+            if (prevIdx >= 0 && prevIdx < STEPS.length) {
+              closeExpand(prevIdx, null);
+            }
+            openExpand(newIdx);
+          }
+
           function beginRun() {
-            /* Dim sides and open first card at the same moment */
             dimSides();
             stepIndex = 0;
             updateState(root, 0);
+            openExpand(0);
             scheduleScroll(false);
-            /* Re-scroll as first expand panel grows */
             phaseTimeouts.push(setTimeout(function () {
               updateTimelinePosition(root, false);
             }, 450));
             phaseTimeouts.push(setTimeout(function () {
               updateTimelinePosition(root, false);
             }, 850));
-            /* Subsequent ticks on interval */
             startLoop();
           }
 
           function tick() {
+            var prevStep = stepIndex;
             stepIndex++;
 
             if (stepIndex <= STEPS.length - 1) {
+              /* Close previous card, open new card, update state */
               updateState(root, stepIndex);
+              transitionExpand(prevStep, stepIndex);
               scheduleScroll(false);
-              /* Re-scroll as expand panel grows open */
               phaseTimeouts.push(setTimeout(function () {
                 updateTimelinePosition(root, false);
               }, 450));
@@ -1555,91 +1589,24 @@ textarea {
             } else if (stepIndex === STEPS.length) {
               clearInterval(intervalId);
 
-              /* Update all cards to "done" state (icons, status text) 
-                 but don't remove expand panels yet */
-              for (var k = 0; k < STEPS.length; k++) {
-                var st = STEPS[k];
-                var iconSlot = root.querySelector('[data-icon="' + k + '"]');
-                if (iconSlot) {
-                  var ni = stepIconHtml(st.actionType, "done");
-                  if (iconSlot.outerHTML !== ni) iconSlot.outerHTML = ni.replace(">", ' data-icon="' + k + '">');
-                }
-                var statusSlot = root.querySelector('[data-status="' + k + '"]');
-                if (statusSlot) {
-                  statusSlot.innerHTML = "<span>" + esc(st.duration) + '</span> <span class="' + (st.status==="pass"?"is-pass":"is-fail") + '">' + esc(st.status) + "</span>";
-                }
-                var card = root.querySelector('[data-card="' + k + '"]');
-                if (card) {
-                  card.className = "ito-step-card" + (st.status === "fail" ? " is-fail" : "");
-                }
-                /* Update report rows to done */
-                var reportRow = root.querySelector('[data-report="' + k + '"]');
-                if (reportRow) reportRow.className = "ito-report-row";
-                var ricon = root.querySelector('[data-ricon="' + k + '"]');
-                if (ricon) {
-                  ricon.className = "ito-mini " + (st.status === "pass" ? "pass" : "fail");
-                  ricon.textContent = st.status === "pass" ? "\u2713" : "\u2715";
-                }
-                var rright = root.querySelector('[data-rright="' + k + '"]');
-                if (rright) {
-                  rright.innerHTML = "<span>" + esc(st.duration) + '</span> <span class="' + (st.status==="pass"?"is-pass":"is-fail") + '">' + esc(st.status) + "</span>";
-                }
-              }
-              /* Update header + metrics to final state */
-              var lbl = root.querySelector("[data-status-label]");
-              if (lbl) lbl.textContent = "Run complete";
-              var cnt = root.querySelector("[data-step-counter]");
-              if (cnt) cnt.textContent = "step " + STEPS.length + "/" + STEPS.length;
-              var prg = root.querySelector("[data-step-progress]");
-              if (prg) prg.style.width = "100%";
-              var cov = root.querySelector("[data-coverage]");
-              if (cov) cov.textContent = "100%";
-              var covBar = root.querySelector("[data-coverage-bar]");
-              if (covBar) covBar.style.width = "100%";
-              var el = root.querySelector("[data-elapsed]");
-              if (el) el.textContent = (STEPS.length * 2) + "s";
-              var pc = STEPS.filter(function(s){return s.status==="pass"}).length;
-              var fc = STEPS.filter(function(s){return s.status==="fail"}).length;
-              var mT = root.querySelector("[data-metric-total]");
-              var mP = root.querySelector("[data-metric-pass]");
-              var mF = root.querySelector("[data-metric-fail]");
-              if (mT) mT.textContent = STEPS.length;
-              if (mP) mP.textContent = pc;
-              if (mF) mF.textContent = fc;
-              var bS = root.querySelector("[data-bottom-stats]");
-              if (bS) bS.textContent = "2 PRs \u00b7 " + STEPS.length + " tests \u00b7 " + fc + " failure" + (fc !== 1 ? "s" : "");
+              /* Update last card to done state */
+              updateState(root, STEPS.length);
 
-              /* Close panels in reverse order (last-run card first)
-                 with overlapping stagger for a wave-like cascade */
-              var CLOSE_STAGGER = 100;
-              var expands = [];
-              var rawExpands = root.querySelectorAll(".ito-step-expand");
-              for (var m = 0; m < rawExpands.length; m++) expands.push(rawExpands[m]);
-              expands.reverse();
+              /* Close the last card's expand panel */
+              closeExpand(prevStep, null);
 
-              for (var n = 0; n < expands.length; n++) {
-                (function(el, d) {
-                  phaseTimeouts.push(setTimeout(function () {
-                    el.classList.add("is-closing");
-                  }, d));
-                })(expands[n], n * CLOSE_STAGGER);
-              }
-
-              /* Smooth scroll back to top as cards collapse
-                 (use a longer duration so it tracks with the folding) */
+              /* Smooth scroll back to top */
               var track = root.querySelector("[data-timeline-track]");
               if (track) {
-                track.style.transition = "transform 1000ms cubic-bezier(0.32, 0.72, 0, 1)";
+                track.style.transition = "transform 1000ms var(--ease-settle)";
                 track.style.transform = "translateY(0)";
               }
 
-              /* After all panels have finished closing, shift focus to QA */
-              var CLOSE_TOTAL = (expands.length - 1) * CLOSE_STAGGER + 800;
+              /* After close animation, shift focus to QA */
               phaseTimeouts.push(setTimeout(function () {
                 focusQA();
-                /* Restore default track transition */
                 if (track) track.style.transition = "";
-              }, CLOSE_TOTAL));
+              }, EXPAND_CLOSE_MS + 100));
 
               /* After focus pause, finalize and restart */
               phaseTimeouts.push(setTimeout(function () {
@@ -1652,7 +1619,7 @@ textarea {
                     doRestart();
                   }, FADE_OUT_DURATION);
                 }, COMPLETE_PAUSE);
-              }, CLOSE_TOTAL + 200));
+              }, EXPAND_CLOSE_MS + 300));
             }
           }
 
@@ -1663,6 +1630,11 @@ textarea {
 
           function doRestart() {
             stepIndex = -1;
+            /* Clear any lingering expand panels */
+            for (var i = 0; i < STEPS.length; i++) {
+              var slot = root.querySelector('[data-expand="' + i + '"]');
+              if (slot) slot.innerHTML = "";
+            }
             updateState(root, -1);
             scheduleScroll(false);
             undimAll();
