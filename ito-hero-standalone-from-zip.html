@@ -48,7 +48,6 @@
   --duration-fast: 270ms;
   --duration-base: 480ms;
   --duration-slow: 750ms;
-  --duration-scroll: 900ms;
 
   --font-body: "Inter", Arial, Helvetica, sans-serif;
 }
@@ -396,11 +395,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  /* pad top so first card border isn't clipped by overflow:hidden when translateY(-1px) */
   padding-top: 2px;
-  transform: translateY(0);
-  transition: transform var(--duration-scroll) var(--ease-settle);
-  will-change: transform;
 }
 
 .ito-step {
@@ -1330,43 +1325,6 @@ textarea {
           wrap.style.height = Math.round(BASE_HEIGHT * scale) + "px";
         }
 
-        function updateTimelinePosition(root, forceTop) {
-          var viewport = root.querySelector("[data-timeline-viewport]");
-          var track = root.querySelector("[data-timeline-track]");
-          if (!viewport || !track) return;
-
-          if (forceTop) {
-            track.style.transform = "translateY(0px)";
-            return;
-          }
-
-          var active = root.querySelector(".ito-step.is-active");
-          if (!active) {
-            track.style.transform = "translateY(0px)";
-            return;
-          }
-
-          var vh = viewport.clientHeight;
-          var cardTop = active.offsetTop;
-          var cardHeight = active.offsetHeight;
-          var maxY = Math.max(0, track.scrollHeight - vh);
-
-          /* Try to fit the entire card in view with some top padding */
-          var topPad = vh * 0.08;
-          var target;
-
-          if (cardHeight + topPad <= vh) {
-            /* Card fits — position with small pad above */
-            target = cardTop - topPad;
-          } else {
-            /* Card is taller than viewport — show from top */
-            target = cardTop - topPad;
-          }
-
-          target = Math.max(0, Math.min(target, maxY));
-          track.style.transform = "translateY(-" + target + "px)";
-        }
-
         function preventScroll(root) {
           function stop(e) { if (root.contains(e.target)) e.preventDefault(); }
           root._itoStop = stop;
@@ -1418,15 +1376,6 @@ textarea {
 
           updateState(root, -1);
           updateScale(root);
-          updateTimelinePosition(root, false);
-
-          function scheduleScroll(forceTop) {
-            requestAnimationFrame(function () {
-              requestAnimationFrame(function () {
-                updateTimelinePosition(root, forceTop);
-              });
-            });
-          }
 
           function clearPhaseTimeouts() {
             for (var i = 0; i < phaseTimeouts.length; i++) clearTimeout(phaseTimeouts[i]);
@@ -1561,13 +1510,6 @@ textarea {
             stepIndex = 0;
             updateState(root, 0);
             openExpand(0);
-            scheduleScroll(false);
-            phaseTimeouts.push(setTimeout(function () {
-              updateTimelinePosition(root, false);
-            }, 450));
-            phaseTimeouts.push(setTimeout(function () {
-              updateTimelinePosition(root, false);
-            }, 850));
             startLoop();
           }
 
@@ -1579,13 +1521,6 @@ textarea {
               /* Close previous card, open new card, update state */
               updateState(root, stepIndex);
               transitionExpand(prevStep, stepIndex);
-              scheduleScroll(false);
-              phaseTimeouts.push(setTimeout(function () {
-                updateTimelinePosition(root, false);
-              }, 450));
-              phaseTimeouts.push(setTimeout(function () {
-                updateTimelinePosition(root, false);
-              }, 850));
             } else if (stepIndex === STEPS.length) {
               clearInterval(intervalId);
 
@@ -1595,17 +1530,9 @@ textarea {
               /* Close the last card's expand panel */
               closeExpand(prevStep, null);
 
-              /* Smooth scroll back to top */
-              var track = root.querySelector("[data-timeline-track]");
-              if (track) {
-                track.style.transition = "transform 1000ms var(--ease-settle)";
-                track.style.transform = "translateY(0)";
-              }
-
               /* After close animation, shift focus to QA */
               phaseTimeouts.push(setTimeout(function () {
                 focusQA();
-                if (track) track.style.transition = "";
               }, EXPAND_CLOSE_MS + 100));
 
               /* After focus pause, finalize and restart */
@@ -1636,7 +1563,6 @@ textarea {
               if (slot) slot.innerHTML = "";
             }
             updateState(root, -1);
-            scheduleScroll(false);
             undimAll();
 
             runIntro(function () {
@@ -1686,7 +1612,6 @@ textarea {
 
           root._itoResize = function () {
             updateScale(root);
-            updateTimelinePosition(root, false);
           };
           window.addEventListener("resize", root._itoResize, { passive: true });
           if ("ResizeObserver" in window) {
