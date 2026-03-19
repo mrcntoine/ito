@@ -1325,22 +1325,11 @@ textarea {
           wrap.style.height = Math.round(BASE_HEIGHT * scale) + "px";
         }
 
-        function preventScroll(root) {
-          function stop(e) { if (root.contains(e.target)) e.preventDefault(); }
-          root._itoStop = stop;
-          root.addEventListener("wheel", stop, { passive: false });
-          root.addEventListener("touchmove", stop, { passive: false });
-        }
-
         /* ━━━━━ LIFECYCLE ━━━━━ */
 
         function cleanup(root) {
           if (!root) return;
           if (root._itoClean) root._itoClean();
-          if (root._itoStop) {
-            root.removeEventListener("wheel", root._itoStop);
-            root.removeEventListener("touchmove", root._itoStop);
-          }
           if (root._itoResize) window.removeEventListener("resize", root._itoResize);
           if (root._itoRO) root._itoRO.disconnect();
         }
@@ -1607,7 +1596,6 @@ textarea {
           var root = document.getElementById("root");
           if (!root) return;
           cleanup(root);
-          preventScroll(root);
           startAnimation(root);
 
           root._itoResize = function () {
