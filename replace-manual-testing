@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Ito – Cursor Inspection</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --white: #ffffff;
+  --g50: #fafafa;
+  --g100: #f4f4f4;
+  --g150: #ececec;
+  --g200: #e2e2e2;
+  --g300: #cccccc;
+  --g400: #aaaaaa;
+  --g500: #888888;
+  --g600: #666666;
+  --g800: #333333;
+  --g900: #1a1a1a;
+  --g950: #111111;
+  --border: var(--g200);
+  --border-soft: var(--g150);
+  --radius-frame: 20px;
+  --radius-card: 14px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --font: "Inter", Arial, Helvetica, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { width: 100%; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--g100);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scale ── */
+.shell { width: 100%; overflow: hidden; }
+.wrap {
+  width: 100%; max-width: 800px; margin: 0 auto;
+  position: relative; overflow: hidden;
+}
+.stage {
+  width: 800px; height: 800px;
+  transform-origin: top left; will-change: transform;
+}
+.frame {
+  width: 800px; height: 800px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-frame);
+  overflow: hidden; position: relative;
+}
+
+.grid {
+  position: absolute;
+  left: 24px; top: 24px; right: 24px; bottom: 24px;
+  display: grid;
+  grid-template-columns: 370px 368px;
+  grid-template-rows: 369px 369px;
+  gap: 14px;
+}
+
+/* ── Card base ── */
+.card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--white);
+  overflow: hidden;
+}
+
+/* Shimmer */
+.sh {
+  background: linear-gradient(105deg, var(--g150) 30%, var(--g100) 50%, var(--g150) 70%);
+  background-size: 250% 100%;
+  animation: shim 2.2s ease-in-out infinite;
+}
+.sh-s {
+  background: linear-gradient(105deg, var(--g100) 30%, var(--g50) 50%, var(--g100) 70%);
+  background-size: 250% 100%;
+  animation: shim 2.6s ease-in-out infinite;
+}
+@keyframes shim {
+  0% { background-position: 200% 0; }
+  100% { background-position: -50% 0; }
+}
+
+/* ═══════════════════════════
+   CHART — left column, full height
+   ═══════════════════════════ */
+.card-chart {
+  grid-column: 1; grid-row: 1 / 3;
+  display: flex; flex-direction: column;
+}
+
+/* Header */
+.ch-hdr {
+  padding: 20px 20px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-shrink: 0;
+}
+.ch-hdr-l { display: flex; flex-direction: column; gap: 7px; }
+.ch-t1 { height: 12px; width: 105px; border-radius: 6px; }
+.ch-t2 { height: 8px; width: 145px; border-radius: 5px; }
+.ch-tag {
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; letter-spacing: .03em;
+  background: var(--g100); color: var(--g600);
+  border: 1px solid var(--g200); flex-shrink: 0;
+}
+
+/* Metrics */
+.ch-mets {
+  display: flex; gap: 8px; padding: 16px 20px 0; flex-shrink: 0;
+}
+.ch-met {
+  flex: 1; padding: 11px 12px; border-radius: 10px;
+  border: 1px solid var(--border-soft); background: var(--g50);
+}
+.ch-met-l { height: 6px; width: 55%; border-radius: 4px; margin-bottom: 9px; }
+.ch-met-v { height: 14px; width: 42%; border-radius: 6px; }
+
+/* ── Chart area: structured y-axis + plot ── */
+.ch-plot-wrap {
+  flex: 1; min-height: 0;
+  display: flex;
+  padding: 18px 20px 0 12px;
+}
+
+/* Y-axis column */
+.ch-yaxis {
+  width: 28px; flex: 0 0 28px;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 0 0 22px; /* bottom aligns with x-axis area */
+}
+.ch-yaxis span {
+  font-size: 9px; color: var(--g300); font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right; line-height: 1;
+}
+
+/* Plot area */
+.ch-plot {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+.ch-svg-wrap {
+  flex: 1; min-height: 0; position: relative;
+}
+.ch-svg-wrap svg {
+  display: block; position: absolute;
+  inset: 0; width: 100%; height: 100%;
+}
+
+/* SVG elements */
+.ch-svg-wrap path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cg { stroke: var(--g100); stroke-width: 1; }
+.cb { stroke: var(--g800); stroke-width: 2; opacity: .35; }
+.ca { stroke: var(--g400); stroke-width: 1.5; stroke-dasharray: 6 4; opacity: .6; }
+.cf { opacity: .2; }
+
+/* X-axis ticks */
+.ch-xaxis {
+  height: 22px; flex-shrink: 0;
+  display: flex; justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--g150);
+}
+.ch-xaxis span {
+  width: 20px; height: 6px; border-radius: 3px; background: var(--g150);
+}
+
+/* Legend */
+.ch-leg {
+  display: flex; gap: 20px;
+  padding: 14px 20px 18px; flex-shrink: 0;
+  border-top: 1px solid var(--border-soft); margin: 0 20px;
+}
+.ch-li {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--g500); font-weight: 500;
+}
+.ch-lc { width: 14px; height: 3px; border-radius: 2px; }
+
+/* ═══════════════════════════
+   NAV — top-right
+   ═══════════════════════════ */
+.card-nav {
+  grid-column: 2; grid-row: 1;
+  display: flex; flex-direction: column;
+}
+.nav-hdr {
+  padding: 16px 18px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+}
+.nav-hdr-t { height: 10px; width: 80px; border-radius: 5px; }
+.nav-hdr-c {
+  font-size: 9px; font-weight: 600; color: var(--g400);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.nav-list { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.nr {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.nr:last-child { border-bottom: none; }
+.nr-i {
+  width: 30px; height: 30px; border-radius: 8px; flex: 0 0 30px;
+  background: var(--g100);
+  display: grid; place-items: center;
+}
+.nr-ii {
+  width: 14px; height: 14px; border-radius: 4px;
+  background: var(--g200);
+}
+.nr-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.nr-t span { display: block; height: 7px; border-radius: 4px; }
+.nr-s {
+  width: 8px; height: 8px; border-radius: 999px; flex: 0 0 8px;
+  background: var(--g200);
+}
+
+/* ═══════════════════════════
+   FLOW — bottom-right
+   ═══════════════════════════ */
+.card-flow {
+  grid-column: 2; grid-row: 2;
+  display: flex; flex-direction: column;
+}
+.fl-hdr {
+  padding: 16px 18px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+}
+.fl-hdr-t { height: 10px; width: 65px; border-radius: 5px; }
+.fl-hdr-c {
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 9px; font-weight: 600; letter-spacing: .03em;
+  background: var(--g100); color: var(--g600); border: 1px solid var(--g200);
+}
+.fl-list {
+  flex: 1; min-height: 0; padding: 4px 18px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.fs {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+}
+.fs + .fs { border-top: 1px solid var(--border-soft); }
+.fs-n {
+  width: 26px; height: 26px; border-radius: 999px; flex: 0 0 26px;
+  display: grid; place-items: center;
+  font-size: 10px; font-weight: 700; color: var(--white);
+}
+.fs-n.n1 { background: var(--g800); }
+.fs-n.n2 { background: var(--g600); }
+.fs-n.n3 { background: var(--g500); }
+.fs-n.n4 { background: var(--g400); }
+.fs-n.n5 { background: var(--g300); }
+.fs-b { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.fs-b span { display: block; height: 7px; border-radius: 4px; }
+.fs-a {
+  width: 18px; height: 18px; flex: 0 0 18px;
+  display: grid; place-items: center;
+}
+.fs-a svg { width: 11px; height: 11px; }
+.fl-prog {
+  margin: 0 18px; padding: 14px 0;
+  border-top: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.fl-pb {
+  flex: 1; height: 5px; border-radius: 999px; background: var(--g100);
+  overflow: hidden;
+}
+.fl-pf {
+  width: 60%; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--g800) 0%, var(--g400) 100%);
+}
+.fl-pl {
+  font-size: 9px; font-weight: 600; color: var(--g500);
+  letter-spacing: .04em; flex-shrink: 0;
+}
+
+/* ━━━ Overlay ━━━ */
+.ov {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 10;
+}
+
+.cur {
+  position: absolute; width: 22px; height: 22px;
+  opacity: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.13));
+  will-change: left, top, opacity;
+  transition: opacity 340ms var(--ease-out);
+}
+.cur.on { opacity: 1; }
+
+.ring {
+  position: absolute;
+  border-radius: calc(var(--radius-card) + 6px);
+  border: 2px solid transparent;
+  opacity: 0; pointer-events: none;
+  will-change: opacity;
+  transition: opacity 400ms var(--ease-out);
+}
+.ring.on { opacity: 1; }
+.ring.c0 {
+  border-color: rgba(217,119,6,0.48);
+  background: rgba(217,119,6,0.025);
+  box-shadow: 0 0 0 1px rgba(217,119,6,0.06);
+}
+.ring.c1 {
+  border-color: rgba(220,38,38,0.42);
+  background: rgba(220,38,38,0.02);
+  box-shadow: 0 0 0 1px rgba(220,38,38,0.05);
+}
+.ring.c2 {
+  border-color: rgba(185,28,28,0.48);
+  background: rgba(185,28,28,0.022);
+  box-shadow: 0 0 0 1px rgba(185,28,28,0.06);
+}
+
+.tip {
+  position: absolute; pointer-events: none;
+  opacity: 0; transform: translateY(5px) scale(0.97); filter: blur(2px);
+  will-change: transform, opacity, filter;
+  transition:
+    opacity 340ms var(--ease-out),
+    transform 340ms var(--ease-out),
+    filter 240ms var(--ease-out);
+}
+.tip.on { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+.tip.ex {
+  opacity: 0; transform: translateY(-3px) scale(0.98); filter: blur(2px);
+  transition: opacity 220ms ease, transform 220ms ease, filter 160ms ease;
+}
+.tip-box {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; border-radius: 10px;
+  background: var(--g950); color: var(--white);
+  font-size: 12px; font-weight: 600; letter-spacing: .01em; white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.06);
+}
+.td {
+  width: 7px; height: 7px; border-radius: 999px; flex: 0 0 auto;
+}
+.td.c0 { background: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.22); }
+.td.c1 { background: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.22); }
+.td.c2 { background: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,0.22); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function () {
+  "use strict";
+
+  /* ═══════════════════════════════════════
+     LAYOUT CONSTANTS
+     ═══════════════════════════════════════ */
+  var FRAME = 800;
+  var PAD   = 24;
+  var GAP   = 14;
+  var COL_L = 370;
+  var INNER = FRAME - PAD * 2;
+  var COL_R = INNER - COL_L - GAP;
+  var ROW   = (INNER - GAP) / 2;
+
+  var C_CHART = [PAD, PAD, COL_L, INNER];
+  var C_NAV   = [PAD + COL_L + GAP, PAD, COL_R, ROW];
+  var C_FLOW  = [PAD + COL_L + GAP, PAD + ROW + GAP, COL_R, ROW];
+
+  var R_OUT = 6;
+
+  /* ═══════════════════════════════════════
+     SVG CHART
+     viewBox 0 0 280 400 — tall proportion
+     y: 0 = top (value 100), 400 = bottom (value 0)
+     Gridlines at y: 0, 100, 200, 300, 400 → values 100, 75, 50, 25, 0
+     ═══════════════════════════════════════ */
+
+  var CHART_VB = "0 0 280 400";
+
+  /* 5 horizontal gridlines aligned to y-axis labels */
+  var GRIDLINES = '';
+  for (var gy = 0; gy <= 400; gy += 100) {
+    GRIDLINES += '<line class="cg" x1="0" y1="' + gy + '" x2="280" y2="' + gy + '"/>';
+  }
+
+  /* Baseline curve — smooth upward trend, confidence-inspiring */
+  var BASELINE = "M0,340 C20,335 50,300 80,270 C110,240 130,260 160,210 C190,160 210,180 235,120 C255,70 270,80 280,60";
+
+  /* Fill under baseline — closes to bottom-right, bottom-left */
+  var FILL = BASELINE + " L280,400 L0,400 Z";
+
+  /* Current / divergent — deviates in the middle zone */
+  var CURRENT = "M0,350 C20,348 50,355 80,320 C110,285 140,340 170,310 C200,280 230,265 255,240 C270,225 278,220 280,215";
+
+  /* Anomaly zone: x 70–165, y 210–360 — spans the divergence region
+     aligned so it feels like a deliberate inspection window */
+  var ANOMALY = '<rect x="70" y="200" width="95" height="170" rx="6" ' +
+    'fill="rgba(150,150,150,.035)" ' +
+    'stroke="rgba(150,150,150,.16)" stroke-width="1" stroke-dasharray="5 3"/>';
+
+  /* Small dot markers at key curve points to add visual interest */
+  var DOTS =
+    '<circle cx="80" cy="270" r="3" fill="var(--g200)"/>' +
+    '<circle cx="160" cy="210" r="3" fill="var(--g200)"/>' +
+    '<circle cx="235" cy="120" r="3" fill="var(--g200)"/>';
+
+  function buildChart() {
+    return '<svg viewBox="' + CHART_VB + '" preserveAspectRatio="xMidYMid meet">' +
+      '<defs>' +
+        '<linearGradient id="gf" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="var(--g400)" stop-opacity=".15"/>' +
+          '<stop offset="100%" stop-color="var(--g400)" stop-opacity="0"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      GRIDLINES +
+      ANOMALY +
+      '<path class="cf" fill="url(#gf)" d="' + FILL + '"/>' +
+      '<path class="cb" d="' + BASELINE + '"/>' +
+      '<path class="ca" d="' + CURRENT + '"/>' +
+      DOTS +
+    '</svg>';
+  }
+
+  /* ═══════════════════════════════════════ */
+
+  var ARROW = '<svg viewBox="0 0 11 11" fill="none"><path d="M4 2L7.5 5.5L4 9" stroke="var(--g300)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function navR(w1, w2) {
+    return '<div class="nr">' +
+      '<div class="nr-i"><div class="nr-ii"></div></div>' +
+      '<div class="nr-t"><span class="sh" style="width:' + w1 + '%"></span><span class="sh-s" style="width:' + w2 + '%"></span></div>' +
+      '<div class="nr-s"></div></div>';
+  }
+
+  function flowS(n, cls, w1, w2) {
+    return '<div class="fs">' +
+      '<div class="fs-n ' + cls + '">' + n + '</div>' +
+      '<div class="fs-b"><span class="sh" style="width:' + w1 + '%"></span><span class="sh-s" style="width:' + w2 + '%"></span></div>' +
+      '<div class="fs-a">' + ARROW + '</div></div>';
+  }
+
+  function build() {
+    return '<section class="shell"><div class="wrap" data-w><div class="stage" data-s><div class="frame">' +
+    '<div class="grid">' +
+
+    /* ══ CHART ══ */
+    '<div class="card card-chart">' +
+      /* Header */
+      '<div class="ch-hdr">' +
+        '<div class="ch-hdr-l"><div class="ch-t1 sh"></div><div class="ch-t2 sh-s"></div></div>' +
+        '<div class="ch-tag">3 anomalies</div>' +
+      '</div>' +
+      /* Metrics */
+      '<div class="ch-mets">' +
+        '<div class="ch-met"><div class="ch-met-l sh-s"></div><div class="ch-met-v sh"></div></div>' +
+        '<div class="ch-met"><div class="ch-met-l sh-s"></div><div class="ch-met-v sh"></div></div>' +
+        '<div class="ch-met"><div class="ch-met-l sh-s"></div><div class="ch-met-v sh"></div></div>' +
+      '</div>' +
+      /* Plot: y-axis + svg + x-axis */
+      '<div class="ch-plot-wrap">' +
+        '<div class="ch-yaxis">' +
+          '<span>100</span><span>75</span><span>50</span><span>25</span><span>0</span>' +
+        '</div>' +
+        '<div class="ch-plot">' +
+          '<div class="ch-svg-wrap">' + buildChart() + '</div>' +
+          '<div class="ch-xaxis">' +
+            '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      /* Legend */
+      '<div class="ch-leg">' +
+        '<div class="ch-li"><div class="ch-lc" style="background:var(--g800);opacity:.35"></div>Baseline</div>' +
+        '<div class="ch-li"><div class="ch-lc" style="background:var(--g400);opacity:.6"></div>Current</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* ══ NAV ══ */
+    '<div class="card card-nav">' +
+      '<div class="nav-hdr"><div class="nav-hdr-t sh"></div><div class="nav-hdr-c">6 routes</div></div>' +
+      '<div class="nav-list">' +
+        navR(72, 40) + navR(58, 34) + navR(80, 48) +
+        navR(50, 30) + navR(66, 42) + navR(54, 36) +
+      '</div>' +
+    '</div>' +
+
+    /* ══ FLOW ══ */
+    '<div class="card card-flow">' +
+      '<div class="fl-hdr"><div class="fl-hdr-t sh"></div><div class="fl-hdr-c">2 issues</div></div>' +
+      '<div class="fl-list">' +
+        flowS("1","n1",74,44) + flowS("2","n2",60,38) +
+        flowS("3","n3",68,42) + flowS("4","n4",52,32) +
+        flowS("5","n5",64,40) +
+      '</div>' +
+      '<div class="fl-prog"><div class="fl-pb"><div class="fl-pf"></div></div><div class="fl-pl">3 / 5</div></div>' +
+    '</div>' +
+
+    '</div>' +
+
+    /* ══ OVERLAY ══ */
+    '<div class="ov">' +
+      '<svg class="cur" data-cur viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.21V20.79c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.45 0 .67-.54.35-.85L6.35 2.85c-.31-.31-.85-.09-.85.36z" fill="#111" stroke="#fff" stroke-width="1.2"/></svg>' +
+      '<div class="ring c0" data-ring="0"></div>' +
+      '<div class="ring c1" data-ring="1"></div>' +
+      '<div class="ring c2" data-ring="2"></div>' +
+      '<div class="tip" data-tip="0"><div class="tip-box"><span class="td c0"></span>UI regressions</div></div>' +
+      '<div class="tip" data-tip="1"><div class="tip-box"><span class="td c1"></span>Unexpected behavior</div></div>' +
+      '<div class="tip" data-tip="2"><div class="tip-box"><span class="td c2"></span>Broken flows</div></div>' +
+    '</div>' +
+
+    '</div></div></div></section>';
+  }
+
+  /* ── Scale ── */
+  function updateScale(root) {
+    var w = root.querySelector("[data-w]");
+    var s = root.querySelector("[data-s]");
+    if (!w || !s) return;
+    var sc = Math.min(1, Math.max(280, w.clientWidth) / FRAME);
+    s.style.transform = "scale(" + sc + ")";
+    w.style.height = Math.round(FRAME * sc) + "px";
+  }
+
+  /* ── Lerp ── */
+  function lerp(a, b, t) {
+    var s = t * t * (3 - 2 * t);
+    return { x: a.x + (b.x - a.x) * s, y: a.y + (b.y - a.y) * s };
+  }
+
+  /* ── Animation ── */
+  function run(fr) {
+    var cur = fr.querySelector("[data-cur]");
+    var rings = [], tips = [];
+    for (var i = 0; i < 3; i++) {
+      rings.push(fr.querySelector('[data-ring="' + i + '"]'));
+      tips.push(fr.querySelector('[data-tip="' + i + '"]'));
+    }
+
+    var BOUNDS = [C_CHART, C_NAV, C_FLOW];
+
+    /* Position rings: uniform 6px outset on all 4 sides */
+    for (var i = 0; i < 3; i++) {
+      var b = BOUNDS[i];
+      rings[i].style.left   = (b[0] - R_OUT) + "px";
+      rings[i].style.top    = (b[1] - R_OUT) + "px";
+      rings[i].style.width  = (b[2] + R_OUT * 2) + "px";
+      rings[i].style.height = (b[3] + R_OUT * 2) + "px";
+    }
+
+    /* Cursor targets */
+    var SEQ = [
+      { cx: C_CHART[0] + C_CHART[2] * 0.45, cy: C_CHART[1] + C_CHART[3] * 0.50 },
+      { cx: C_NAV[0]   + C_NAV[2]   * 0.50, cy: C_NAV[1]   + C_NAV[3]   * 0.48 },
+      { cx: C_FLOW[0]  + C_FLOW[2]  * 0.50, cy: C_FLOW[1]  + C_FLOW[3]  * 0.50 }
+    ];
+
+    /* Tip offset from cursor */
+    for (var j = 0; j < 3; j++) {
+      tips[j].style.left = (SEQ[j].cx + 16) + "px";
+      tips[j].style.top  = (SEQ[j].cy - 16) + "px";
+    }
+
+    var cp = { x: FRAME / 2, y: FRAME / 2 };
+    var raf = null, tIds = [];
+
+    function sched(fn, ms) { tIds.push(setTimeout(fn, ms)); }
+    function clr() {
+      for (var k = 0; k < tIds.length; k++) clearTimeout(tIds[k]);
+      tIds = [];
+      if (raf) cancelAnimationFrame(raf);
+    }
+
+    function setC(x, y) { cur.style.left = x + "px"; cur.style.top = y + "px"; }
+    function showC() { cur.classList.add("on"); }
+    function hideC() { cur.classList.remove("on"); }
+    function showT(i) { tips[i].classList.remove("ex"); tips[i].classList.add("on"); rings[i].classList.add("on"); }
+    function hideT(i) { tips[i].classList.remove("on"); tips[i].classList.add("ex"); rings[i].classList.remove("on"); }
+    function hideAll() { for (var k = 0; k < 3; k++) { tips[k].classList.remove("on","ex"); rings[k].classList.remove("on"); } }
+
+    function moveC(dest, dur, cb) {
+      var st = { x: cp.x, y: cp.y }, t0 = null;
+      function f(ts) {
+        if (!t0) t0 = ts;
+        var t = Math.min(1, (ts - t0) / dur);
+        var p = lerp(st, dest, t);
+        cp.x = p.x; cp.y = p.y; setC(p.x, p.y);
+        if (t < 1) raf = requestAnimationFrame(f);
+        else if (cb) cb();
+      }
+      raf = requestAnimationFrame(f);
+    }
+
+    var MV = 880, TD = 180, TS = 1650, TE = 260, GP = 200, EW = 1100;
+
+    function seq() {
+      clr(); hideAll(); hideC();
+      cp = { x: FRAME / 2, y: FRAME / 2 };
+      setC(cp.x, cp.y);
+
+      var t = 420;
+      sched(showC, t); t += 300;
+
+      for (var i = 0; i < 3; i++) {
+        (function (idx, at) {
+          sched(function () {
+            moveC({ x: SEQ[idx].cx, y: SEQ[idx].cy }, MV, function () {
+              sched(function () { showT(idx); }, TD);
+              sched(function () { hideT(idx); }, TD + TS);
+            });
+          }, at);
+        })(i, t);
+        t += MV + TD + TS + TE + GP;
+      }
+
+      sched(hideC, t + EW);
+      sched(seq, t + EW + 480);
+    }
+
+    setC(FRAME / 2, FRAME / 2);
+    seq();
+    return clr;
+  }
+
+  /* ── Mount ── */
+  function mount() {
+    var root = document.getElementById("root");
+    if (!root) return;
+    root.innerHTML = build();
+    updateScale(root);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { run(root.querySelector(".frame")); });
+    });
+    var r = function () { updateScale(root); };
+    window.addEventListener("resize", r, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(r).observe(root);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
+  else mount();
+})();
+</script>
+</body>
+</html>
