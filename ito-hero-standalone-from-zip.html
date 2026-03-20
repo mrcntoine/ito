@@ -176,7 +176,7 @@ textarea {
 .ito-hero-grid {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 280px;
-  height: calc(760px - 104px);
+  height: calc(100% - 104px);
   min-height: 0;
 }
 
@@ -787,6 +787,113 @@ textarea {
   100% { background-position: -200% 0; }
 }
 
+/* ━━━━━ RESPONSIVE: TABLET ━━━━━ */
+
+.ito-hero-frame.is-tablet .ito-hero-grid {
+  grid-template-columns: minmax(0, 1fr) 260px;
+}
+
+.ito-hero-frame.is-tablet .ito-col-left {
+  display: none;
+}
+
+.ito-hero-frame.is-tablet .ito-col-center {
+  border-right: 1px solid var(--border-soft);
+}
+
+/* ━━━━━ RESPONSIVE: COMPACT (MOBILE) ━━━━━ */
+
+.ito-hero-frame.is-compact .ito-hero-grid {
+  grid-template-columns: 1fr;
+  height: calc(100% - 88px);
+}
+
+.ito-hero-frame.is-compact .ito-col-left {
+  display: none;
+}
+
+.ito-hero-frame.is-compact .ito-col-right {
+  display: none;
+}
+
+.ito-hero-frame.is-compact .ito-col-center {
+  border-right: none;
+}
+
+.ito-hero-frame.is-compact .ito-hero-topbar,
+.ito-hero-frame.is-compact .ito-hero-bottombar {
+  height: 44px;
+  padding: 0 14px;
+  font-size: 10px;
+}
+
+.ito-hero-frame.is-compact .ito-col {
+  padding: 14px;
+}
+
+.ito-hero-frame.is-compact .ito-step-card {
+  padding: 12px;
+}
+
+.ito-hero-frame.is-compact .ito-timeline-track {
+  gap: 10px;
+}
+
+.ito-hero-frame.is-compact .ito-step-sub {
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.ito-hero-frame.is-compact .ito-shot {
+  width: 68px;
+  height: 48px;
+}
+
+.ito-hero-frame.is-compact .ito-code {
+  font-size: 10px;
+  padding: 10px;
+}
+
+.ito-hero-frame.is-compact .ito-statusbar {
+  margin-top: 12px;
+  padding: 10px 12px;
+  font-size: 10px;
+}
+
+.ito-hero-frame.is-compact .ito-bottom-right .ito-connected {
+  display: none;
+}
+
+/* ━━━━━ RESPONSIVE: INLINE REPORT (compact mode shows summary beneath timeline) ━━━━━ */
+
+.ito-compact-report {
+  display: none;
+}
+
+.ito-hero-frame.is-compact .ito-compact-report {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.ito-compact-report .ito-compact-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.ito-compact-report .ito-compact-stat .is-pass { color: var(--success); }
+.ito-compact-report .ito-compact-stat .is-fail { color: var(--danger); }
+
 /* ━━━━━ REDUCED MOTION ━━━━━ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -812,8 +919,19 @@ textarea {
         "use strict";
         document.documentElement.classList.remove("dark");
 
-        var BASE_WIDTH = 1280;
-        var BASE_HEIGHT = 760;
+        /* ── Layout mode constants ── */
+        var MODE_FULL = "full";
+        var MODE_TABLET = "tablet";
+        var MODE_COMPACT = "compact";
+
+        var BREAKPOINT_TABLET = 1024;
+        var BREAKPOINT_COMPACT = 640;
+
+        var DIMENSIONS = {};
+        DIMENSIONS[MODE_FULL]    = { w: 1280, h: 760 };
+        DIMENSIONS[MODE_TABLET]  = { w: 920,  h: 720 };
+        DIMENSIONS[MODE_COMPACT] = { w: 460,  h: 680 };
+
         var INTRO_LEAD = 450;
         var FADE_OUT_DURATION = 675;
         var STEP_INTERVAL = 5100;
@@ -873,22 +991,16 @@ textarea {
           /* Auth flow — login page progression */
           "auth-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
             '<rect width="64" height="44" fill="#fff"/>' +
-            /* top nav bar */
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
             '<rect x="48" y="1.5" width="5" height="2" rx="1" fill="#ddd"/><rect x="55" y="1.5" width="6" height="2" rx="1" fill="#3b82f6"/>' +
-            /* card container */
             '<rect x="14" y="9" width="36" height="30" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
-            /* heading */
             '<rect x="22" y="12" width="20" height="2" rx="1" fill="#222"/>' +
             '<rect x="25" y="15.5" width="14" height="1.5" rx=".75" fill="#aaa"/>' +
-            /* email label + field */
             '<rect x="18" y="20" width="8" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="18" y="22" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
-            /* password label + field */
             '<rect x="18" y="28" width="10" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="18" y="30" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
-            /* submit */
             '<rect x="18" y="36" width="28" height="4" rx="2" fill="#3b82f6"/>' +
             '<rect x="27" y="37.2" width="10" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
           '</svg>',
@@ -902,12 +1014,10 @@ textarea {
             '<rect x="22" y="12" width="20" height="2" rx="1" fill="#222"/>' +
             '<rect x="25" y="15.5" width="14" height="1.5" rx=".75" fill="#aaa"/>' +
             '<rect x="18" y="20" width="8" height="1.2" rx=".5" fill="#888"/>' +
-            /* filled email field - blue focus ring */
             '<rect x="18" y="22" width="28" height="4" rx="1.5" fill="#fff" stroke="#3b82f6" stroke-width=".7"/>' +
             '<rect x="20" y="23.3" width="18" height="1.5" rx=".75" fill="#333"/>' +
             '<rect x="18" y="28" width="10" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="18" y="30" width="28" height="4" rx="1.5" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
-            /* password dots */
             '<circle cx="21" cy="32" r=".8" fill="#333"/><circle cx="23.5" cy="32" r=".8" fill="#333"/><circle cx="26" cy="32" r=".8" fill="#333"/><circle cx="28.5" cy="32" r=".8" fill="#333"/><circle cx="31" cy="32" r=".8" fill="#333"/><circle cx="33.5" cy="32" r=".8" fill="#333"/>' +
             '<rect x="18" y="36" width="28" height="4" rx="2" fill="#3b82f6"/>' +
             '<rect x="27" y="37.2" width="10" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
@@ -918,17 +1028,14 @@ textarea {
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
             '<rect x="48" y="1.5" width="5" height="2" rx="1" fill="#ddd"/><rect x="55" y="1.5" width="6" height="2" rx="1" fill="#3b82f6"/>' +
-            /* success state - green banner */
             '<rect x="14" y="9" width="36" height="30" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
             '<rect x="14" y="9" width="36" height="6" rx="3" fill="#f0fdf4"/><rect x="14" y="12" width="36" height="3" fill="#f0fdf4"/>' +
             '<circle cx="28" cy="12" r="2" fill="#dcfce7" stroke="#16a34a" stroke-width=".6"/>' +
             '<polyline points="27,12 28,13 29.5,11" fill="none" stroke="#16a34a" stroke-width=".7" stroke-linecap="round" stroke-linejoin="round"/>' +
             '<rect x="31.5" y="11.2" width="12" height="1.5" rx=".75" fill="#16a34a"/>' +
-            /* redirect text */
             '<rect x="20" y="20" width="24" height="2" rx="1" fill="#222"/>' +
             '<rect x="22" y="24" width="20" height="1.5" rx=".75" fill="#aaa"/>' +
             '<rect x="24" y="27" width="16" height="1.5" rx=".75" fill="#aaa"/>' +
-            /* dashboard preview */
             '<rect x="18" y="32" width="28" height="5" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width=".5"/>' +
             '<rect x="20" y="33.5" width="6" height="2" rx="1" fill="#dbeafe"/><rect x="28" y="33.5" width="6" height="2" rx="1" fill="#dcfce7"/><rect x="36" y="33.5" width="6" height="2" rx="1" fill="#e0e7ff"/>' +
           '</svg>',
@@ -938,22 +1045,18 @@ textarea {
             '<rect width="64" height="44" fill="#fff"/>' +
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
-            /* cart badge */
             '<rect x="53" y="1" width="5" height="3" rx="1.5" fill="none" stroke="#888" stroke-width=".5"/>' +
             '<circle cx="57" cy="1.5" r="1.5" fill="#3b82f6"/><rect x="56" y=".8" width="2" height="1.3" rx=".5" fill="#fff"/>' +
-            /* product row 1 */
             '<rect x="3" y="8" width="9" height="9" rx="2" fill="#f1f5f9"/>' +
             '<rect x="14" y="8.5" width="20" height="1.8" rx=".75" fill="#222"/>' +
             '<rect x="14" y="11.5" width="12" height="1.3" rx=".5" fill="#aaa"/>' +
             '<rect x="14" y="14" width="8" height="1.5" rx=".75" fill="#111" opacity=".8"/>' +
             '<rect x="49" y="10" width="12" height="3" rx="1.5" fill="#f1f5f9" stroke="#d1d5db" stroke-width=".4"/>' +
-            /* product row 2 */
             '<rect x="3" y="19.5" width="9" height="9" rx="2" fill="#f0fdf4"/>' +
             '<rect x="14" y="20" width="18" height="1.8" rx=".75" fill="#222"/>' +
             '<rect x="14" y="23" width="14" height="1.3" rx=".5" fill="#aaa"/>' +
             '<rect x="14" y="25.5" width="8" height="1.5" rx=".75" fill="#111" opacity=".8"/>' +
             '<rect x="49" y="21.5" width="12" height="3" rx="1.5" fill="#f1f5f9" stroke="#d1d5db" stroke-width=".4"/>' +
-            /* product row 3 */
             '<rect x="3" y="31" width="9" height="9" rx="2" fill="#fef3c7"/>' +
             '<rect x="14" y="31.5" width="22" height="1.8" rx=".75" fill="#222"/>' +
             '<rect x="14" y="34.5" width="10" height="1.3" rx=".5" fill="#aaa"/>' +
@@ -965,24 +1068,17 @@ textarea {
             '<rect width="64" height="44" fill="#fff"/>' +
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
-            /* heading */
             '<rect x="3" y="8" width="16" height="2" rx="1" fill="#222"/>' +
-            /* table header */
             '<rect x="3" y="13" width="58" height=".5" fill="#e5e7eb"/>' +
             '<rect x="3" y="11.5" width="10" height="1.2" rx=".5" fill="#999"/><rect x="22" y="11.5" width="6" height="1.2" rx=".5" fill="#999"/><rect x="35" y="11.5" width="6" height="1.2" rx=".5" fill="#999"/><rect x="50" y="11.5" width="10" height="1.2" rx=".5" fill="#999"/>' +
-            /* row 1 */
             '<rect x="3" y="15" width="14" height="1.3" rx=".5" fill="#444"/><rect x="24" y="15" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="15" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="15" width="8" height="1.3" rx=".5" fill="#444"/>' +
             '<rect x="3" y="18" width="58" height=".3" fill="#f0f0f0"/>' +
-            /* row 2 */
             '<rect x="3" y="20" width="12" height="1.3" rx=".5" fill="#444"/><rect x="24" y="20" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="20" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="20" width="9" height="1.3" rx=".5" fill="#444"/>' +
             '<rect x="3" y="23" width="58" height=".3" fill="#f0f0f0"/>' +
-            /* row 3 */
             '<rect x="3" y="25" width="16" height="1.3" rx=".5" fill="#444"/><rect x="24" y="25" width="4" height="1.3" rx=".5" fill="#444"/><rect x="36" y="25" width="6" height="1.3" rx=".5" fill="#444"/><rect x="50" y="25" width="7" height="1.3" rx=".5" fill="#444"/>' +
             '<rect x="3" y="28" width="58" height=".5" fill="#e5e7eb"/>' +
-            /* totals */
             '<rect x="35" y="30.5" width="8" height="1.3" rx=".5" fill="#888"/><rect x="50" y="30.5" width="10" height="1.5" rx=".75" fill="#111"/>' +
             '<rect x="35" y="33.5" width="6" height="1.3" rx=".5" fill="#888"/><rect x="50" y="33.5" width="10" height="1.5" rx=".75" fill="#111"/>' +
-            /* checkout button */
             '<rect x="35" y="37" width="26" height="4" rx="2" fill="#111"/>' +
             '<rect x="41" y="38.2" width="14" height="1.5" rx=".75" fill="#fff" opacity=".9"/>' +
           '</svg>',
@@ -992,24 +1088,19 @@ textarea {
             '<rect width="64" height="44" fill="#fff"/>' +
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
-            /* steps indicator */
             '<circle cx="22" cy="8" r="1.5" fill="#16a34a"/><rect x="24" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="32" cy="8" r="1.5" fill="#16a34a"/><rect x="34" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="42" cy="8" r="1.5" fill="#3b82f6" stroke="#3b82f6" stroke-width=".5"/>' +
-            /* card number label + field */
             '<rect x="4" y="12" width="14" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="4" y="14" width="56" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
             '<rect x="7" y="15.8" width="20" height="1.5" rx=".75" fill="#333"/>' +
             '<rect x="51" y="15.5" width="6" height="2" rx="1" fill="#e0e7ff"/>' +
-            /* expiry + cvv */
             '<rect x="4" y="22" width="8" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="4" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
             '<rect x="7" y="25.8" width="10" height="1.5" rx=".75" fill="#333"/>' +
             '<rect x="34" y="22" width="4" height="1.2" rx=".5" fill="#888"/>' +
             '<rect x="34" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
             '<rect x="37" y="25.8" width="8" height="1.5" rx=".75" fill="#333"/>' +
-            /* pay button */
             '<rect x="4" y="33" width="56" height="5" rx="2.5" fill="#111"/>' +
             '<rect x="20" y="34.5" width="24" height="1.8" rx=".75" fill="#fff" opacity=".9"/>' +
-            /* secure badge */
             '<rect x="22" y="40" width="20" height="1.5" rx=".75" fill="#bbb"/>' +
           '</svg>',
 
@@ -1017,21 +1108,15 @@ textarea {
             '<rect width="64" height="44" fill="#fff"/>' +
             '<rect width="64" height="5" fill="#fafafa"/><rect x="0" y="5" width="64" height=".5" fill="#eee"/>' +
             '<rect x="3" y="1.5" width="8" height="2" rx="1" fill="#333"/>' +
-            /* steps indicator */
             '<circle cx="22" cy="8" r="1.5" fill="#16a34a"/><rect x="24" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="32" cy="8" r="1.5" fill="#16a34a"/><rect x="34" y="7.6" width="6" height=".8" fill="#d1d5db"/><circle cx="42" cy="8" r="1.5" fill="#ef4444"/>' +
-            /* card number - error state */
             '<rect x="4" y="12" width="14" height="1.2" rx=".5" fill="#ef4444"/>' +
             '<rect x="4" y="14" width="56" height="5" rx="2" fill="#fff" stroke="#fca5a5" stroke-width=".7"/>' +
             '<rect x="7" y="15.8" width="20" height="1.5" rx=".75" fill="#333"/>' +
-            /* error message */
             '<rect x="4" y="20.5" width="30" height="1.2" rx=".5" fill="#ef4444"/>' +
-            /* expiry + cvv */
             '<rect x="4" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
             '<rect x="34" y="24" width="26" height="5" rx="2" fill="#fff" stroke="#d1d5db" stroke-width=".5"/>' +
-            /* disabled pay button */
             '<rect x="4" y="33" width="56" height="5" rx="2.5" fill="#d1d5db"/>' +
             '<rect x="20" y="34.5" width="24" height="1.8" rx=".75" fill="#fff" opacity=".5"/>' +
-            /* timeout indicator */
             '<rect x="4" y="40.5" width="56" height="2" rx="1" fill="#fef2f2"/>' +
             '<rect x="4" y="40.5" width="36" height="2" rx="1" fill="#fecaca"/>' +
           '</svg>',
@@ -1039,44 +1124,34 @@ textarea {
           /* Confirmation — email template */
           "confirm-1": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
             '<rect width="64" height="44" fill="#f9fafb"/>' +
-            /* email card */
             '<rect x="8" y="3" width="48" height="38" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
-            /* logo area */
             '<circle cx="32" cy="9" r="3" fill="#f3e8ff"/>' +
             '<rect x="30.5" y="7.5" width="3" height="2" rx=".5" fill="#a855f7" opacity=".6"/>' +
             '<polyline points="30.5,7.5 32,9 33.5,7.5" fill="none" stroke="#a855f7" stroke-width=".5"/>' +
-            /* heading */
             '<rect x="18" y="15" width="28" height="2" rx="1" fill="#222"/>' +
             '<rect x="14" y="19" width="36" height="1.3" rx=".5" fill="#aaa"/>' +
             '<rect x="18" y="21.5" width="28" height="1.3" rx=".5" fill="#aaa"/>' +
-            /* order box */
             '<rect x="12" y="25" width="40" height="8" rx="2" fill="#faf5ff" stroke="#e9d5ff" stroke-width=".4"/>' +
             '<rect x="15" y="27" width="12" height="1.3" rx=".5" fill="#7c3aed"/>' +
             '<rect x="15" y="29.5" width="20" height="1" rx=".5" fill="#aaa"/>' +
             '<rect x="42" y="27.5" width="7" height="2" rx="1" fill="#7c3aed" opacity=".15"/><rect x="43" y="28" width="5" height="1" rx=".5" fill="#7c3aed"/>' +
-            /* footer link */
             '<rect x="20" y="35.5" width="24" height="1.3" rx=".5" fill="#bbb"/>' +
             '<rect x="24" y="38" width="16" height="1" rx=".5" fill="#ddd"/>' +
           '</svg>',
 
           "confirm-2": '<svg viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">' +
             '<rect width="64" height="44" fill="#f9fafb"/>' +
-            /* email card */
             '<rect x="8" y="3" width="48" height="38" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width=".5"/>' +
-            /* green success header */
             '<rect x="8" y="3" width="48" height="10" rx="3" fill="#f0fdf4"/><rect x="8" y="10" width="48" height="3" fill="#f0fdf4"/>' +
             '<circle cx="32" cy="8" r="3.5" fill="#dcfce7" stroke="#16a34a" stroke-width=".6"/>' +
             '<polyline points="30,8 31.5,9.5 34.5,6.5" fill="none" stroke="#16a34a" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>' +
-            /* confirmed text */
             '<rect x="19" y="16" width="26" height="2" rx="1" fill="#16a34a"/>' +
             '<rect x="14" y="20" width="36" height="1.3" rx=".5" fill="#aaa"/>' +
             '<rect x="18" y="22.5" width="28" height="1.3" rx=".5" fill="#aaa"/>' +
-            /* order details */
             '<rect x="12" y="26" width="40" height="10" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width=".4"/>' +
             '<rect x="15" y="28" width="8" height="1" rx=".5" fill="#999"/><rect x="36" y="28" width="13" height="1" rx=".5" fill="#333"/>' +
             '<rect x="15" y="30.5" width="10" height="1" rx=".5" fill="#999"/><rect x="36" y="30.5" width="9" height="1" rx=".5" fill="#333"/>' +
             '<rect x="15" y="33" width="6" height="1" rx=".5" fill="#999"/><rect x="36" y="33" width="11" height="1" rx=".5" fill="#16a34a"/>' +
-            /* footer */
             '<rect x="22" y="38" width="20" height="1.3" rx=".5" fill="#bbb"/>' +
           '</svg>',
         };
@@ -1147,6 +1222,8 @@ textarea {
                 '<div class="ito-col-head ito-col-head-split"><span>Agent Timeline</span><div class="ito-head-progress ito-fadeable" data-tl-progress><span data-step-counter>step 1/' + STEPS.length + '</span><div class="ito-progress ito-progress-short"><span data-step-progress style="width:0%"></span></div></div></div>' +
                 '<div class="ito-timeline-viewport" data-timeline-viewport><div class="ito-timeline-track" data-timeline-track>' + timelineSteps + '</div></div>' +
                 '<div class="ito-statusbar ito-fadeable" data-tl-status><div class="ito-status-left"><span class="ito-run-spinner"></span><span data-status-label>Initialising\u2026</span></div><span>ito-agent</span></div>' +
+                /* Compact report strip — visible only on mobile */
+                '<div class="ito-compact-report ito-fadeable" data-compact-report><span>Report</span><span class="ito-compact-stat"><span class="is-pass" data-compact-pass>0</span> passed</span><span class="ito-compact-stat"><span class="is-fail" data-compact-fail>0</span> failed</span><span data-compact-coverage>0%</span></div>' +
               '</div></main>' +
               '<aside class="ito-col ito-col-right"><div class="ito-col-head">QA Report</div>' +
                 '<div class="ito-report-summary ito-fadeable" data-qa-summary><div class="ito-report-summary-top"><span>Coverage</span><strong data-coverage>0%</strong></div><div class="ito-progress"><span data-coverage-bar style="width:0%"></span></div><div class="ito-report-summary-bottom"><span>#run-88241</span><span data-elapsed>\u2014</span></div></div>' +
@@ -1197,7 +1274,6 @@ textarea {
             var isRunning = !isIdle && !isComplete && safeIndex === i;
             var isFuture = isIdle || safeIndex < i;
             var stateStr = isRunning ? "running" : isDone ? "done" : "idle";
-            var isLast = i === STEPS.length - 1;
 
             if (isIdle) {
               isDone = false;
@@ -1305,6 +1381,14 @@ textarea {
           if (mPass) mPass.textContent = passCount;
           if (mFail) mFail.textContent = failCount;
 
+          /* compact report strip */
+          var cPass = root.querySelector("[data-compact-pass]");
+          var cFail = root.querySelector("[data-compact-fail]");
+          var cCov = root.querySelector("[data-compact-coverage]");
+          if (cPass) cPass.textContent = passCount;
+          if (cFail) cFail.textContent = failCount;
+          if (cCov) cCov.textContent = progress + "%";
+
           /* bottom bar stats */
           var bStats = root.querySelector("[data-bottom-stats]");
           if (bStats) {
@@ -1314,15 +1398,39 @@ textarea {
 
         /* ━━━━━ HELPERS ━━━━━ */
 
+        function getLayoutMode(containerWidth) {
+          if (containerWidth < BREAKPOINT_COMPACT) return MODE_COMPACT;
+          if (containerWidth < BREAKPOINT_TABLET) return MODE_TABLET;
+          return MODE_FULL;
+        }
+
+        var currentMode = null;
+
         function updateScale(root) {
-          var shell = root.querySelector(".ito-stage-shell");
           var wrap = root.querySelector("[data-ito-scale-wrap]");
           var stage = root.querySelector("[data-ito-scale-stage]");
-          if (!shell || !wrap || !stage) return;
-          var avail = Math.max(320, wrap.clientWidth);
-          var scale = Math.min(1, avail / BASE_WIDTH);
+          var frame = root.querySelector(".ito-hero-frame");
+          if (!wrap || !stage || !frame) return;
+
+          var avail = Math.max(300, wrap.clientWidth);
+          var mode = getLayoutMode(avail);
+          var dim = DIMENSIONS[mode];
+
+          /* Apply layout mode class */
+          frame.classList.toggle("is-compact", mode === MODE_COMPACT);
+          frame.classList.toggle("is-tablet", mode === MODE_TABLET);
+
+          /* Set stage dimensions */
+          stage.style.width = dim.w + "px";
+          stage.style.height = dim.h + "px";
+          frame.style.width = dim.w + "px";
+          frame.style.height = dim.h + "px";
+
+          var scale = Math.min(1, avail / dim.w);
           stage.style.transform = "scale(" + scale + ")";
-          wrap.style.height = Math.round(BASE_HEIGHT * scale) + "px";
+          wrap.style.height = Math.round(dim.h * scale) + "px";
+
+          currentMode = mode;
         }
 
         /* ━━━━━ LIFECYCLE ━━━━━ */
@@ -1393,13 +1501,19 @@ textarea {
             for (var i = 0; i < all.length; i++) all[i].classList.remove("is-visible");
           }
 
+          function isCompact() {
+            return currentMode === MODE_COMPACT;
+          }
+
           function dimSides() {
+            if (isCompact()) return; /* no side columns to dim */
             if (colLeft) colLeft.classList.add("is-dimmed");
             if (colRight) colRight.classList.add("is-dimmed");
             if (colCenter) colCenter.classList.remove("is-dimmed");
           }
 
           function focusQA() {
+            if (isCompact()) return; /* no side columns to focus */
             if (colLeft) colLeft.classList.add("is-dimmed");
             if (colCenter) colCenter.classList.add("is-dimmed");
             if (colRight) colRight.classList.remove("is-dimmed");
@@ -1414,47 +1528,53 @@ textarea {
           function runIntro(callback) {
             var t = INTRO_LEAD;
 
-            /* Phase 2: PR cards one by one */
-            var prItems = root.querySelectorAll("[data-pr-card]");
-            var prSkeleton = root.querySelector("[data-pr-skeleton]");
-            var prMeta = root.querySelector("[data-pr-meta]");
-            var prAll = [];
-            for (var i = 0; i < prItems.length; i++) prAll.push(prItems[i]);
-            if (prSkeleton) prAll.push(prSkeleton);
-            if (prMeta) prAll.push(prMeta);
-            t = staggerShow(prAll, t);
-            t += PHASE_GAP;
+            /* Phase 2: PR cards one by one (skip on compact — hidden anyway) */
+            if (!isCompact()) {
+              var prItems = root.querySelectorAll("[data-pr-card]");
+              var prSkeleton = root.querySelector("[data-pr-skeleton]");
+              var prMeta = root.querySelector("[data-pr-meta]");
+              var prAll = [];
+              for (var i = 0; i < prItems.length; i++) prAll.push(prItems[i]);
+              if (prSkeleton) prAll.push(prSkeleton);
+              if (prMeta) prAll.push(prMeta);
+              t = staggerShow(prAll, t);
+              t += PHASE_GAP;
+            }
 
             /* Phase 3: Timeline cards one by one */
             var tlCards = root.querySelectorAll("[data-step-index]");
             var tlProgress = root.querySelector("[data-tl-progress]");
             var tlStatus = root.querySelector("[data-tl-status]");
+            var compactReport = root.querySelector("[data-compact-report]");
             var tlAll = [];
             for (var j = 0; j < tlCards.length; j++) tlAll.push(tlCards[j]);
             if (tlProgress) tlAll.push(tlProgress);
             if (tlStatus) tlAll.push(tlStatus);
+            if (isCompact() && compactReport) tlAll.push(compactReport);
             t = staggerShow(tlAll, t);
             t += PHASE_GAP;
 
-            /* Phase 4: QA Report items one by one */
-            var qaSummary = root.querySelector("[data-qa-summary]");
-            var qaList = root.querySelector("[data-qa-list]");
-            var qaFooter = root.querySelector("[data-qa-footer]");
-            var qaAll = [];
-            if (qaSummary) qaAll.push(qaSummary);
-            if (qaList) qaAll.push(qaList);
-            if (qaFooter) qaAll.push(qaFooter);
-            t = staggerShow(qaAll, t);
+            /* Phase 4: QA Report items one by one (skip on compact — hidden) */
+            if (!isCompact()) {
+              var qaSummary = root.querySelector("[data-qa-summary]");
+              var qaList = root.querySelector("[data-qa-list]");
+              var qaFooter = root.querySelector("[data-qa-footer]");
+              var qaAll = [];
+              if (qaSummary) qaAll.push(qaSummary);
+              if (qaList) qaAll.push(qaList);
+              if (qaFooter) qaAll.push(qaFooter);
+              t = staggerShow(qaAll, t);
+            }
 
-            /* Wait for last QA item's transition to finish, then fire callback */
-            var FADE_TRANSITION = 675; /* match .ito-fadeable transition duration */
+            /* Wait for last item's transition to finish, then fire callback */
+            var FADE_TRANSITION = 675;
             phaseTimeouts.push(setTimeout(function () {
               if (callback) callback();
             }, t + FADE_TRANSITION));
           }
 
           /* ── Expand handoff: close prev card, open new card simultaneously ── */
-          var EXPAND_CLOSE_MS = 800; /* time to wait before removing closed panel DOM */
+          var EXPAND_CLOSE_MS = 800;
 
           function openExpand(idx) {
             if (idx < 0 || idx >= STEPS.length) return;
@@ -1487,7 +1607,6 @@ textarea {
           }
 
           function transitionExpand(prevIdx, newIdx) {
-            /* Close previous and open next simultaneously */
             if (prevIdx >= 0 && prevIdx < STEPS.length) {
               closeExpand(prevIdx, null);
             }
@@ -1507,24 +1626,18 @@ textarea {
             stepIndex++;
 
             if (stepIndex <= STEPS.length - 1) {
-              /* Close previous card, open new card, update state */
               updateState(root, stepIndex);
               transitionExpand(prevStep, stepIndex);
             } else if (stepIndex === STEPS.length) {
               clearInterval(intervalId);
 
-              /* Update last card to done state */
               updateState(root, STEPS.length);
-
-              /* Close the last card's expand panel */
               closeExpand(prevStep, null);
 
-              /* After close animation, shift focus to QA */
               phaseTimeouts.push(setTimeout(function () {
                 focusQA();
               }, EXPAND_CLOSE_MS + 100));
 
-              /* After focus pause, finalize and restart */
               phaseTimeouts.push(setTimeout(function () {
                 updateState(root, STEPS.length);
 
@@ -1546,7 +1659,6 @@ textarea {
 
           function doRestart() {
             stepIndex = -1;
-            /* Clear any lingering expand panels */
             for (var i = 0; i < STEPS.length; i++) {
               var slot = root.querySelector('[data-expand="' + i + '"]');
               if (slot) slot.innerHTML = "";
